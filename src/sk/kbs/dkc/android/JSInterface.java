@@ -1,0 +1,29 @@
+package sk.kbs.dkc.android;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.content.res.AssetManager;
+import android.util.Log;
+import sk.kbs.dkc.android.svpismo;
+
+import java.lang.Object;
+
+public class JSInterface {
+    svpismo mContext;
+
+    JSInterface (svpismo c) {
+      mContext = c;
+    }
+
+    public void loadit(final String url) {
+      Log.v("svpismo", "bridge called: "+url);
+      mContext.wv.post(new Runnable() {
+        public void run() {
+          mContext.load(url);
+        }
+      });
+    }
+
+}
