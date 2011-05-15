@@ -270,7 +270,7 @@ char *StringEncode(char *in) {
   return (char *)out;
 }
 
-jstring Java_sk_kbs_dkc_android_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring) {
+jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring) {
   int d,m,y;
   char query[1024];
   const char *qstr;

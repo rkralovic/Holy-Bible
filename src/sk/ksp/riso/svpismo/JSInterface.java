@@ -1,4 +1,4 @@
-package sk.kbs.dkc.android;
+package sk.ksp.riso.svpismo;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -6,7 +6,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.content.res.AssetManager;
 import android.util.Log;
-import sk.kbs.dkc.android.svpismo;
+import sk.ksp.riso.svpismo.svpismo;
 
 import java.lang.Object;
 

@@ -1,4 +1,4 @@
-package sk.kbs.dkc.android;
+package sk.ksp.riso.svpismo;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.util.Log;
 
 import java.lang.Object;
 
-import sk.kbs.dkc.android.JSInterface;
+import sk.ksp.riso.svpismo.JSInterface;
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
@@ -23,37 +23,17 @@ public class svpismo extends Activity
 
     public WebView wv;
 
-    static final int HISTSIZE = 1000;
-    String hist[];
-    int histHead, histAct, histTail;
-
-    void rawLoad(String url) {
+    public void load(String url) {
       String cnt = process(db, db_len, css, css_len, url);
       wv.loadData(cnt, "text/html", "utf-8");
     }
 
-    public void load(String url) {
-      hist[histAct] = url;
-      histAct = (histAct+1) % HISTSIZE;
-      histTail = histAct;
-      if (histHead == histAct) histHead = (histHead+1) % HISTSIZE;
-      rawLoad(url);
-    }
-
     public void back() {
-      if (histHead != histAct) {
-        if ((histHead+1)%HISTSIZE != histAct) {
-          histAct = (histAct + HISTSIZE-1) % HISTSIZE;
-          rawLoad( hist[(histAct + HISTSIZE-1) % HISTSIZE] );
-        }
-      }
+      wv.goBack();
     }
 
     public void forward() {
-      if (histAct != histTail) {
-        rawLoad( hist[histAct] );
-        histAct = (histAct + 1) % HISTSIZE;
-      }
+      wv.goForward();
     }
 
     /** Called when the activity is first created. */
