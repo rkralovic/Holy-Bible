@@ -17,15 +17,43 @@ import java.nio.channels.*;
 
 public class svpismo extends Activity
 {
-    private static final String TAG = "svpismo";
+    static final String TAG = "svpismo";
     MappedByteBuffer db, css;
     long db_len, css_len;
 
     public WebView wv;
 
-    public void load(String url) {
+    static final int HISTSIZE = 1000;
+    String hist[];
+    int histHead, histAct, histTail;
+
+    void rawLoad(String url) {
       String cnt = process(db, db_len, css, css_len, url);
       wv.loadData(cnt, "text/html", "utf-8");
+    }
+
+    public void load(String url) {
+      hist[histAct] = url;
+      histAct = (histAct+1) % HISTSIZE;
+      histTail = histAct;
+      if (histHead == histAct) histHead = (histHead+1) % HISTSIZE;
+      rawLoad(url);
+    }
+
+    public void back() {
+      if (histHead != histAct) {
+        if ((histHead+1)%HISTSIZE != histAct) {
+          histAct = (histAct + HISTSIZE-1) % HISTSIZE;
+          rawLoad( hist[(histAct + HISTSIZE-1) % HISTSIZE] );
+        }
+      }
+    }
+
+    public void forward() {
+      if (histAct != histTail) {
+        rawLoad( hist[histAct] );
+        histAct = (histAct + 1) % HISTSIZE;
+      }
     }
 
     /** Called when the activity is first created. */
@@ -56,6 +84,9 @@ public class svpismo extends Activity
 
           wv.getSettings().setJavaScriptEnabled(true);
           wv.addJavascriptInterface(new JSInterface(this), "bridge");
+          histHead = 0;
+          histAct = 0;
+          hist = new String[HISTSIZE];
           load("pismo.cgi?c=Jn1,1");
 
           wv.setWebViewClient( new WebViewClient() {
