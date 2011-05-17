@@ -64,9 +64,6 @@ public class svpismo extends Activity
 
           wv.getSettings().setJavaScriptEnabled(true);
           wv.addJavascriptInterface(new JSInterface(this), "bridge");
-          histHead = 0;
-          histAct = 0;
-          hist = new String[HISTSIZE];
           load("pismo.cgi?c=Jn1,1");
 
           wv.setWebViewClient( new WebViewClient() {
