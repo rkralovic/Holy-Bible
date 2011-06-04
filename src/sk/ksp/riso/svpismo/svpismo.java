@@ -6,6 +6,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.content.res.*;
 import android.util.Log;
+import android.widget.Button;
+import android.view.View;
+import android.view.Window;
 
 import java.lang.Object;
 
@@ -44,7 +47,33 @@ public class svpismo extends Activity
 
         final svpismo myself = this;
 
-        wv = new WebView(this);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.svpismo);
+
+        wv = (WebView)findViewById(R.id.wv);
+        ((Button)findViewById(R.id.backBtn)).setOnClickListener(new View.OnClickListener() {
+          public void onClick(View v) {
+            wv.goBack();
+          }
+        });
+   
+        ((Button)findViewById(R.id.forwardBtn)).setOnClickListener(new View.OnClickListener() {
+          public void onClick(View v) {
+            wv.goForward();
+          }
+        });
+   
+        ((Button)findViewById(R.id.downBtn)).setOnClickListener(new View.OnClickListener() {
+          public void onClick(View v) {
+            wv.pageDown(true);
+          }
+        });
+   
+        ((Button)findViewById(R.id.pgdnBtn)).setOnClickListener(new View.OnClickListener() {
+          public void onClick(View v) {
+            wv.pageDown(false);
+          }
+        });
 
         try {
           {
@@ -75,7 +104,8 @@ public class svpismo extends Activity
             }
           });
 
-          setContentView(wv);
+          wv.getSettings().setBuiltInZoomControls(true);
+
         } catch (IOException e) {
           wv.loadData("Some problem.", "text/html", "utf-8");
         }
