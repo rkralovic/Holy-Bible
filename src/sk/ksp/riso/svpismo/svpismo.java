@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.Window;
 
 import java.lang.Object;
-
 import sk.ksp.riso.svpismo.JSInterface;
 import java.io.*;
 import java.nio.*;
@@ -91,9 +90,11 @@ public class svpismo extends Activity
             css_len = dbf.getLength();
           }
 
+          if (wv.restoreState(savedInstanceState) == null)
+            load("pismo.cgi?c=Jn1,1");
+
           wv.getSettings().setJavaScriptEnabled(true);
           wv.addJavascriptInterface(new JSInterface(this), "bridge");
-          load("pismo.cgi?c=Jn1,1");
 
           wv.setWebViewClient( new WebViewClient() {
             svpismo parent;
@@ -109,6 +110,10 @@ public class svpismo extends Activity
         } catch (IOException e) {
           wv.loadData("Some problem.", "text/html", "utf-8");
         }
+    }
+
+    protected void onSaveInstanceState(Bundle outState) {
+      wv.saveState(outState);
     }
 
     public native String process(ByteBuffer db, long db_len, ByteBuffer css, long css_len, String querystring);
