@@ -15,7 +15,8 @@ import sk.ksp.riso.svpismo.JSInterface;
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
-
+import android.net.Uri;
+import android.content.Intent;
 
 public class svpismo extends Activity
 {
@@ -90,8 +91,13 @@ public class svpismo extends Activity
             css_len = dbf.getLength();
           }
 
-          if (wv.restoreState(savedInstanceState) == null)
-            load("pismo.cgi?c=Jn1,1");
+          Intent I = getIntent();
+          if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
+            load("pismo.cgi?" + I.getData().getQuery());
+          } else {
+            if (wv.restoreState(savedInstanceState) == null)
+              load("pismo.cgi?c=Jn1,1");
+          }
 
           wv.getSettings().setJavaScriptEnabled(true);
           wv.addJavascriptInterface(new JSInterface(this), "bridge");
