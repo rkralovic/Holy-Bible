@@ -27,9 +27,10 @@ varianta: ID casti             { NEW($$, varianty, NULL); $$.varianty->l = $2.ca
     |                          { NEW($$, varianty, NULL); $$.varianty->l = NULL; }
 ;
 
-casti: suradnice DOT casti     { $$ = $1; $$.casti->n = $3.casti; $$.casti->range = 0; }
-    | suradnice DASH casti     { $$ = $1; $$.casti->n = $3.casti; $$.casti->range = 1; } 
-    | suradnice                { $$ = $1; $$.casti->range = 0; } 
+casti: suradnice DOT casti      { $$ = $1; $$.casti->n = $3.casti; $$.casti->range = 0; }
+    | suradnice SEMICOLON casti { $$ = $1; $$.casti->n = $3.casti; $$.casti->range = 0; }
+    | suradnice DASH casti      { $$ = $1; $$.casti->n = $3.casti; $$.casti->range = 1; } 
+    | suradnice                 { $$ = $1; $$.casti->range = 0; } 
 ;
 
 suradnice: hlava COMMA vers   { NEW($$, casti, NULL); $$.casti->k[0] = 0; $$.casti->h = $1.num; $$.casti->v = $3.num; }
