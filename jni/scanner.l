@@ -14,13 +14,22 @@ void scan_string(char *s) {
 void free_scan_string() {
   yy_delete_buffer(buf);
 }
+
+void despace(char *s) {
+  char *i;
+  for (i=s; *i; i++) {
+    *s = *i;
+    if (*s!=' ') s++;
+  }
+  *s = *i;
+}
        
 %}
 
 extern YYSTYPE yylval;
 ALNUM  [^\n -.,;"'\\<>()*]
 ALPHA  [^\n -.,;"'\\0-9<>()*]
-IDLIST 1[sS]am|2[sS]am|1[kK]r|2[kK]r|1[kK]rn|2[kK]rn|1[kK]or|2[kK]or|1[sS]ol|2[sS]ol|1[tT]im|2[tT]im|1[pP]t|2[pP]t|1[jJ]n|2[jJ]n|3[jJ]n|1[mM]ach|2[mM]ach|[a-zA-Z]{ALPHA}+
+IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]or|2\ *[kK]or|1\ *[sS]ol|2\ *[sS]ol|1\ *[tT]im|2\ *[tT]im|1\ *[pP]t|2\ *[pP]t|1\ *[jJ]n|2\ *[jJ]n|3\ *[jJ]n|1\ *[mM]ach|2\ *[mM]ach|[a-zA-Z]{ALPHA}+
 
 %%
 \         // skip spaces
@@ -29,7 +38,7 @@ IDLIST 1[sS]am|2[sS]am|1[kK]r|2[kK]r|1[kK]rn|2[kK]rn|1[kK]or|2[kK]or|1[sS]ol|2[s
 \/kr\.[^/]*\/  return OR;
 \/[^/]*\/  // skip comments // strncpy(yylval.id, yytext, sizeof(yylval.id)); return COMMENT;
 \<[^>]*\>    strncpy(yylval.id, yytext, sizeof(yylval.id)); return REGEXP;
-{IDLIST}  strncpy(yylval.id, yytext, sizeof(yylval.id)); return ID;
+{IDLIST}  strncpy(yylval.id, yytext, sizeof(yylval.id)); despace(yylval.id); return ID;
 [0-9]+    sscanf(yytext, "%d", &yylval.num); return NUM;
 \-        return DASH;
 \xe2\x80\x93  return DASH;
