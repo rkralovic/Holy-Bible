@@ -79,6 +79,7 @@ void Print(struct casti *_c) {
   // do not free k - it might be used in first/last
 }
 
+// FIXME: dealokovat
 void Process(struct citania *l) {
   int i;
   for (i=0; l!=NULL; i++, l=l->n) {
@@ -199,6 +200,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   time_t t;
   struct tm *tt;
 
+  zalm = NULL;
   db_len = _dblen;
   db = (*env)->GetDirectBufferAddress(env,_db);
   css = (*env)->GetDirectBufferAddress(env,_css);
@@ -206,9 +208,9 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
 
   time(&t);
   tt = localtime(&t);
-  d = tt->tm_mday;
-  m = tt->tm_mon+1;
-  y = tt->tm_year+1900;
+  d = -1;
+  m = -1;
+  y = -1;
 
   qstr = (*env)->GetStringUTFChars(env, querystring, NULL);
 //  __android_log_print(ANDROID_LOG_INFO, "svpismo", "qstr = %s\n", qstr);
@@ -232,6 +234,12 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
       query[0]=0;
       sscanf(s+7, "%1000[^&]", query);
       search = StringDecode(query);
+    }
+    s = strstr(qstr, "zalm="); 
+    if (s) {
+      query[0]=0;
+      sscanf(s+5, "%1000[^&]", query);
+      zalm = StringDecode(query);
     }
     (*env)->ReleaseStringUTFChars(env,  querystring, qstr);
   }
@@ -270,7 +278,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   kontext_last_hb=kontext_last_he=-1;
   first.h=last.h=-1;
 
-  if (coord) {
+  if (coord && d==-1) {
     Prn(&out, "<title>%s</title>\n"
       "</head><body>\n"
       "<div class=\"nadpis\">%s</div>\n\n", coord, coord);
@@ -346,23 +354,14 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
 
     free_fulltext_search();
   } else {
-    char *ct;
-    if (!get_citania(y,m,d, &zalm, &ct)) {
-      db_close();
-      FreeBuf(&kontext);
-      FreeBuf(&out);
-      return (*env)->NewStringUTF(env, "");
-    }
-
     kalendar = 1;
-
     //  Prn(&out, "%s %s %s %s\n", row[0], row[1], row[2], row[3]);
 
     Prn(&out, "<title>Čítania na %d.%d.%d</title>\n"
         "</head><body>\n"
         "<div class=\"nadpis\">Liturgické čítania na %d.%d.%d</div>\n\n",
         d,m,y,d,m,y);
-    scan_string(ct);
+    scan_string(coord);
     yyparse();
 
     /* toto asi nechceme
@@ -373,10 +372,13 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
       free(tmp);
     }
     */
+    free_scan_string();
 
-    free(zalm);
-    free(ct);
   }
+  if (zalm) free(zalm);
+  if (coord) free(coord);
+  // FIXME: leaks from the structure!
+
   Prn(&out, "<p>\n"
       "<input type=\"text\" id=\"zobraz\">\n"
       "<button onClick=\"submitcoord()\">Zobraz</button>\n");
