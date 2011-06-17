@@ -18,6 +18,11 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="http" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="sk.ksp.riso.svpismo.action.SHOW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="svpismo" />
+            </intent-filter>
         </activity>
     </application>
 </manifest> 

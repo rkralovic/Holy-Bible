@@ -8,7 +8,7 @@
 #include "db_bin.h"
 #include <jni.h>
 
-char *zalm;
+char *zalm, *aleluja;
 int kalendar;
 
 struct strbuf kontext, out;
@@ -88,7 +88,10 @@ void Process(struct citania *l) {
     if (kalendar) {
       if (i%2 && l->n) Prn(&out, "<div class=\"citanie\">Žalm</div>\n\n");
       else if (l->n) Prn(&out, "<div class=\"citanie\">%d. čítanie</div>\n\n", i/2 + 1);
-      else Prn(&out, "<div class=\"citanie\">Evanjelium</div>\n\n");
+      else {
+        Prn(&out, "<p><span class=\"redbold\">Aleluja: </span><span class=\"it\">%s</span></p>\n\n", aleluja);
+        Prn(&out, "<div class=\"citanie\">Evanjelium</div>\n\n");
+      }
 
       if (i==1 && l->n)  Prn(&out, "<p><span class=\"redbold\">R: </span><span class=\"it\">%s</span></p>\n\n", zalm);
     }
@@ -200,7 +203,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   time_t t;
   struct tm *tt;
 
-  zalm = NULL;
+  aleluja = zalm = NULL;
   db_len = _dblen;
   db = (*env)->GetDirectBufferAddress(env,_db);
   css = (*env)->GetDirectBufferAddress(env,_css);
@@ -213,7 +216,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   y = -1;
 
   qstr = (*env)->GetStringUTFChars(env, querystring, NULL);
-//  __android_log_print(ANDROID_LOG_INFO, "svpismo", "qstr = %s\n", qstr);
+  __android_log_print(ANDROID_LOG_INFO, "svpismo", "qstr = %s\n", qstr);
   if (qstr) {
     char *s;
     s = strstr(qstr, "d="); if (s) sscanf(s, "d=%d", &d);
@@ -240,6 +243,12 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
       query[0]=0;
       sscanf(s+5, "%1000[^&]", query);
       zalm = StringDecode(query);
+    }
+    s = strstr(qstr, "aleluja="); 
+    if (s) {
+      query[0]=0;
+      sscanf(s+8, "%1000[^&]", query);
+      aleluja = StringDecode(query);
     }
     (*env)->ReleaseStringUTFChars(env,  querystring, qstr);
   }
@@ -376,6 +385,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
 
   }
   if (zalm) free(zalm);
+  if (aleluja) free(aleluja);
   if (coord) free(coord);
   // FIXME: leaks from the structure!
 
