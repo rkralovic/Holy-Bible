@@ -402,6 +402,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
     char *tmp = StringEncode(out.buf);
     jout = (*env)->NewStringUTF(env, tmp);
     free(tmp);
+//    jout = (*env)->NewStringUTF(env, out.buf);
   }
 
   FreeBuf(&kontext);
