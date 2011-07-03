@@ -259,7 +259,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   Prn(&out, "<html><head>\n"
 //      "<link rel=\"stylesheet\" href=\"breviar.css\">\n"
       "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n"
-      "<meta name=\"viewport\" content=\"width=100%; initial-scale=1; maximum-scale=1; minimum-scale=1; user-scalable=no;\" />"
+//      "<meta name=\"viewport\" content=\"width=100%; initial-scale=1; maximum-scale=1; minimum-scale=1; user-scalable=no;\" />"
       );
 
   Prn(&out, "<style type=\"text/css\">\n<!--\n");
