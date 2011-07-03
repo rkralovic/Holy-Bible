@@ -148,7 +148,8 @@ char *StringDecode(char *in) {
       else out[i]+=s[2]-'0';
       
       s+=2;
-    } else if (s[0]=='+') out[i]=' ';
+    }
+//    } else if (s[0]=='+') out[i]=' ';
     else out[i]=s[0];
   }
   out[i]=0;

@@ -7,11 +7,10 @@
 
 #define NEW(new, type, next) { new.type = (struct type *)malloc(sizeof(struct type)); new.type->n = next; }
 
-//    | suradnice SEMICOLON casti { $$ = $1; $$.casti->n = $3.casti; $$.casti->range = 0; }
-
 %}
 
 %token OR COMMENT REGEXP ID NUM DASH DOT COMMA SEMICOLON
+%glr-parser
 
 %%
 
@@ -31,6 +30,7 @@ varianta: ID casti             { NEW($$, varianty, NULL); $$.varianty->l = $2.ca
 
 casti: suradnice DOT casti      { $$ = $1; $$.casti->n = $3.casti; $$.casti->range = 0; }
     | suradnice DASH casti      { $$ = $1; $$.casti->n = $3.casti; $$.casti->range = 1; } 
+    | suradnice SEMICOLON casti { $$ = $1; $$.casti->n = $3.casti; $$.casti->range = 0; }
     | suradnice                 { $$ = $1; $$.casti->range = 0; } 
 ;
 
