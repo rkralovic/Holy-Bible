@@ -5,6 +5,4 @@
     <string name="down">Dole</string>
     <string name="forward">Vpred</string>
     <string name="pgdn">Ďalej</string>
-    <string name="zoom_out">-</string>
-    <string name="zoom_in">+</string>
 </resources>
