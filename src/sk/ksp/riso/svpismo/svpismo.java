@@ -11,19 +11,25 @@ import android.view.View;
 import android.view.Window;
 
 import java.lang.Object;
+import sk.ksp.riso.svpismo.JSInterface;
 import java.io.*;
+import java.nio.*;
+import java.nio.channels.*;
 import android.net.Uri;
 import android.content.Intent;
-
-import sk.ksp.riso.svpismo.Server;
 
 public class svpismo extends Activity
 {
     static final String TAG = "svpismo";
-    static final String scriptname = "pismo.cgi";
-    Server S = null;
+    MappedByteBuffer db, css;
+    long db_len, css_len;
 
     public WebView wv;
+
+    public void load(String url) {
+      String cnt = process(db, db_len, css, css_len, url);
+      wv.loadData(cnt, "text/html", "utf-8");
+    }
 
     public void back() {
       wv.goBack();
@@ -31,12 +37,6 @@ public class svpismo extends Activity
 
     public void forward() {
       wv.goForward();
-    }
-
-    public void load(String qs) {
-      String url = "http://localhost:" + S.port + "/" + scriptname + "?" + qs;
-//      Log.v("SvPismo", "Opening " + url);
-      wv.loadUrl(url);
     }
 
     /** Called when the activity is first created. */
@@ -76,43 +76,55 @@ public class svpismo extends Activity
         });
 
         try {
-          if (S==null) {
-            S = new Server(this, scriptname);
-            S.start();
+          {
+            AssetFileDescriptor dbf = getAssets().openFd("pismo.bin");
+            FileInputStream fis = dbf.createInputStream();
+            FileChannel channel = fis.getChannel();
+            db = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
+            db_len = dbf.getLength();
+          }
+
+          {
+            AssetFileDescriptor dbf = getAssets().openFd("breviar.css");
+            FileChannel channel = dbf.createInputStream().getChannel();
+            css = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
+            css_len = dbf.getLength();
           }
 
           Intent I = getIntent();
           if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
-            load(I.getData().getQuery());
+            load("pismo.cgi?" + I.getData().getQuery());
           } else {
             if (wv.restoreState(savedInstanceState) == null)
-              load("c=Jn1,1");
+              load("pismo.cgi?c=Jn1,1");
           }
+
+          wv.getSettings().setJavaScriptEnabled(true);
+          wv.addJavascriptInterface(new JSInterface(this), "bridge");
+
+          wv.setWebViewClient( new WebViewClient() {
+            svpismo parent;
+            { parent = myself; }
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+              parent.load(url);
+              return true;
+            }
+          });
+
+          wv.getSettings().setBuiltInZoomControls(true);
 
         } catch (IOException e) {
-          wv.loadData("Some problem. Cannot initialize webserver:" + e.getMessage(), "text/html", "utf-8");
+          wv.loadData("Some problem.", "text/html", "utf-8");
         }
-
-        wv.getSettings().setBuiltInZoomControls(true);
-        wv.getSettings().setJavaScriptEnabled(true);
-        wv.setWebViewClient(new WebViewClient() {
-          @Override
-          public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            view.loadUrl(url);
-            return true;
-          }
-        } );
-
     }
 
     protected void onSaveInstanceState(Bundle outState) {
       wv.saveState(outState);
     }
 
-    @Override
-    public void onDestroy() {
-      if (S != null) S.stopServer();
-      super.onDestroy();
-    }
+    public native String process(ByteBuffer db, long db_len, ByteBuffer css, long css_len, String querystring);
 
+    static {
+        System.loadLibrary("pismo");
+    }
 }
