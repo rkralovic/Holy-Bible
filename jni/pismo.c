@@ -189,7 +189,7 @@ char *StringEncode(char *in) {
   return (char *)out;
 }
 
-jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring) {
+jstring Java_sk_ksp_riso_svpismo_Server_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jstring querystring) {
   int d,m,y;
   char query[1024];
   const char *qstr;
@@ -206,7 +206,6 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   aleluja = zalm = NULL;
   db_len = _dblen;
   db = (*env)->GetDirectBufferAddress(env,_db);
-  css = (*env)->GetDirectBufferAddress(env,_css);
   if (db==NULL) return (*env)->NewStringUTF(env, "");
 
   time(&t);
@@ -248,37 +247,32 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
     if (s) {
       query[0]=0;
       sscanf(s+8, "%1000[^&]", query);
-      aleluja = StringDecode(query);
-    }
+      aleluja = StringDecode(query); }
     (*env)->ReleaseStringUTFChars(env,  querystring, qstr);
   }
 
   if (db_init()<0) return (*env)->NewStringUTF(env, "");
 
   InitBuf(&out); Rst(&out);
+  Prn(&out, "Content-type: text/html\n\n");
+
   Prn(&out, "<html><head>\n"
-//      "<link rel=\"stylesheet\" href=\"breviar.css\">\n"
+      "<link rel=\"stylesheet\" href=\"breviar.css\">\n"
       "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n"
       "<meta name=\"viewport\" content=\"width=100%; initial-scale=1; maximum-scale=1; minimum-scale=1; user-scalable=no;\" />"
       );
 
-  Prn(&out, "<style type=\"text/css\">\n<!--\n");
-  Cpy(&out, css, css_len);
-
-
-  Prn(&out, "\n--></style>");
-
   Prn(&out, 
       "<script type=\"text/javascript\"> \
           function submitsearch() { \
-            bridge.loadit(\"pismo.cgi?search=\"+document.getElementById('searchstring').value ); \
+            loadUrl(\"pismo.cgi?search=\"+document.getElementById('searchstring').value ); \
           } \
        </script>");
 
   Prn(&out, 
       "<script type=\"text/javascript\"> \
           function submitcoord() { \
-            bridge.loadit(\"pismo.cgi?c=\"+document.getElementById('zobraz').value ); \
+            loadUrl(\"pismo.cgi?c=\"+document.getElementById('zobraz').value ); \
           } \
        </script>");
 
@@ -398,11 +392,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
     
   Prn(&out, "</body></html>\n");
 
-  {
-    char *tmp = StringEncode(out.buf);
-    jout = (*env)->NewStringUTF(env, tmp);
-    free(tmp);
-  }
+  jout = (*env)->NewStringUTF(env, out.buf);
 
   FreeBuf(&kontext);
   FreeBuf(&out);
