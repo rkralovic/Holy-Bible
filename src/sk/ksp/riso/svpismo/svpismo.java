@@ -28,6 +28,8 @@ public class svpismo extends Activity
 
     public void load(String url) {
       String cnt = process(db, db_len, css, css_len, url);
+      int sc = (int)(wv.getScale()*100);
+      wv.setInitialScale(sc);
       wv.loadData(cnt, "text/html", "utf-8");
     }
 
