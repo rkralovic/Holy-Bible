@@ -7,16 +7,19 @@ extern void yyerror(const char *);
 extern int yylex();
 
 struct citania {
+  int cnt;
   struct varianty *l;
   struct citania *n;
 };
 
 struct varianty {
+  int cnt;
   struct casti *l;
   struct varianty *n;
 };
 
 struct casti {
+  int cnt;
   char k[20];
   int h, v;
   char range;
