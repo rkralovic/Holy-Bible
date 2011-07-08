@@ -42,7 +42,7 @@ IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]o
 [0-9]+    sscanf(yytext, "%d", &yylval.num); return NUM;
 \-        return DASH;
 \xe2\x80\x93  return DASH;
-\+        return DASH;
+\+        return DOT;
 \.        return DOT;
 \,        return COMMA;
 \;        return SEMICOLON;
