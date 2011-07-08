@@ -17,19 +17,20 @@ import java.nio.*;
 import java.nio.channels.*;
 import android.net.Uri;
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 public class svpismo extends Activity
 {
     static final String TAG = "svpismo";
+    static final String prefname = "SvPismoPrefs";
     MappedByteBuffer db, css;
     long db_len, css_len;
+    int scale;
 
     public WebView wv;
 
     public void load(String url) {
       String cnt = process(db, db_len, css, css_len, url);
-      int sc = (int)(wv.getScale()*100);
-      wv.setInitialScale(sc);
       wv.loadData(cnt, "text/html", "utf-8");
     }
 
@@ -52,7 +53,12 @@ public class svpismo extends Activity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.svpismo);
 
+        SharedPreferences settings = getSharedPreferences(prefname, 0);
+        scale = settings.getInt("scale", 100);
+
         wv = (WebView)findViewById(R.id.wv);
+        wv.setInitialScale(scale);
+
         ((Button)findViewById(R.id.backBtn)).setOnClickListener(new View.OnClickListener() {
           public void onClick(View v) {
             wv.goBack();
@@ -111,6 +117,13 @@ public class svpismo extends Activity
               parent.load(url);
               return true;
             }
+
+            @Override
+            public void onScaleChanged(WebView view, float oldSc, float newSc) {
+              parent.scale = (int)(newSc*100);
+              view.setInitialScale(parent.scale);
+            }
+
           });
 
           wv.getSettings().setBuiltInZoomControls(true);
@@ -122,6 +135,19 @@ public class svpismo extends Activity
 
     protected void onSaveInstanceState(Bundle outState) {
       wv.saveState(outState);
+      syncPreferences();
+    }
+
+    void syncPreferences() {
+      SharedPreferences settings = getSharedPreferences(prefname, 0);
+      SharedPreferences.Editor editor = settings.edit();
+      editor.putInt("scale", scale);
+      editor.commit();
+    }
+
+    protected void onStop(){
+      super.onStop();
+      syncPreferences();
     }
 
     public native String process(ByteBuffer db, long db_len, ByteBuffer css, long css_len, String querystring);
