@@ -48,6 +48,6 @@ IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]o
 \;        return SEMICOLON;
 \n        //
 {ALPHA}+    strncpy(yylval.id, yytext, sizeof(yylval.id)); return ID;
-.         yyerror("cannot scan!");
+.         yyerror("cannot scan!"); return ERROR;
 
 %%

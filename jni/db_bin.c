@@ -163,11 +163,13 @@ static int find_coord(int k, int hl, int v, int dir) {
   struct vers *V;
 
   if (hl <= -1) return (dir==1) ? knh[k].min : knh[k].max;
-  if (hl<0 || hl>=knh[k].n_hlav) return -1;
+  if (hl<0) hl = 0;
+  if (hl>=knh[k].n_hlav) hl = knh[k].n_hlav -1;
   H = ((struct hlava *)(base + knh[k].hlava)) + hl;
 
   if (v <= -1) return (dir==1) ? H->min : H->max;
-  if (v<0 || v>=H->n_versov) return -1;
+  if (v<0) v = 0;
+  if (v>=H->n_versov) v = H->n_versov -1;
   V = ((struct vers *)(base + H->vers)) + v;
 
   return (dir==1) ? V->min : V->max;

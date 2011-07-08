@@ -296,7 +296,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
     scan_string(coord);
     yyparse();
 
-    {
+    if (strlen(kontext.buf)>1) {
       char *tmp = StringEncode(kontext.buf+1);
       Prn(&out, // "<p>\n"
           "<a href=\"pismo.cgi?c=%s\">Kontext</a>", tmp);
