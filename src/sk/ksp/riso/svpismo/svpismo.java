@@ -28,10 +28,17 @@ public class svpismo extends Activity
     int scale;
 
     public WebView wv;
+    boolean wv_initialized = false;
 
     public void load(String url) {
+      if (wv_initialized) {
+        scale = (int)(wv.getScale()*100);
+//        Log.v("svpismo", "load: getScale " + scale);
+      }
       String cnt = process(db, db_len, css, css_len, url);
       wv.loadData(cnt, "text/html", "utf-8");
+      wv.setInitialScale(scale);
+      wv_initialized = true;
     }
 
     public void back() {
@@ -55,8 +62,10 @@ public class svpismo extends Activity
 
         SharedPreferences settings = getSharedPreferences(prefname, 0);
         scale = settings.getInt("scale", 100);
+//        Log.v("svpismo", "init with scale " + scale);
 
         wv = (WebView)findViewById(R.id.wv);
+        wv.getSettings().setBuiltInZoomControls(true);
         wv.setInitialScale(scale);
 
         ((Button)findViewById(R.id.backBtn)).setOnClickListener(new View.OnClickListener() {
@@ -122,11 +131,10 @@ public class svpismo extends Activity
             public void onScaleChanged(WebView view, float oldSc, float newSc) {
               parent.scale = (int)(newSc*100);
               view.setInitialScale(parent.scale);
+//              Log.v("svpismo", "onScaleChanged " + parent.scale);
             }
 
           });
-
-          wv.getSettings().setBuiltInZoomControls(true);
 
         } catch (IOException e) {
           wv.loadData("Some problem.", "text/html", "utf-8");
@@ -134,7 +142,10 @@ public class svpismo extends Activity
     }
 
     protected void onSaveInstanceState(Bundle outState) {
+      scale = (int)(wv.getScale()*100);
+      wv.setInitialScale(scale);
       wv.saveState(outState);
+//      Log.v("svpismo", "onSaveInstanceState " + scale);
       syncPreferences();
     }
 
@@ -146,8 +157,11 @@ public class svpismo extends Activity
     }
 
     protected void onStop(){
-      super.onStop();
+      scale = (int)(wv.getScale()*100);
+      wv.setInitialScale(scale);
+//      Log.v("svpismo", "onStop " + scale);
       syncPreferences();
+      super.onPause();
     }
 
     public native String process(ByteBuffer db, long db_len, ByteBuffer css, long css_len, String querystring);
