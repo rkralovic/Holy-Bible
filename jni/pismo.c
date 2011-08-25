@@ -190,6 +190,21 @@ char *StringEncode(char *in) {
   return (char *)out;
 }
 
+void TOC() {
+  char *b1, *b2, *q;
+  int h1, h2;
+  get_first(&b1, &h1);
+  while (b1 != NULL) {
+    Prn(&out, "<p> %s: <a href=\"pismo.cgi?c=%s%d\">%d</a>", b1, b1, h1, h1);
+    for (get_next(b1, h1, &b2, &h2); b2!=NULL && !strcmp(b1,b2); q=b2, get_next(b2, h2, &b2, &h2), free(q))
+      Prn(&out, ", <a href=\"pismo.cgi?c=%s%d\">%d</a>", b2, h2, h2);
+    Prn(&out, "\n");
+    free(b1);
+    b1 = b2;
+    h1 = h2;
+  }
+}
+
 jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring) {
   int d,m,y;
   char query[1024];
@@ -363,7 +378,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
     }
 
     free_fulltext_search();
-  } else {
+  } else if (coord) {
     kalendar = 1;
     //  Prn(&out, "%s %s %s %s\n", row[0], row[1], row[2], row[3]);
 
@@ -384,6 +399,11 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
     */
     free_scan_string();
 
+  } else {
+    Prn(&out, "<title>Obsah</title>\n"
+        "</head><body>\n"
+        "<div class=\"nadpis\">Obsah</div>\n\n");
+    TOC();
   }
   if (zalm) free(zalm);
   if (aleluja) free(aleluja);
@@ -396,6 +416,8 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   Prn(&out, "<p>\n"
       "<input type=\"text\" id=\"searchstring\">\n"
       "<button onClick=\"submitsearch()\">Hľadaj</button>\n");
+  Prn(&out, "<p>\n"
+      "<a href=\"pismo.cgi\">Obsah</a>\n");
     
   Prn(&out, "</body></html>\n");
 

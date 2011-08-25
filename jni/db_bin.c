@@ -309,6 +309,11 @@ void get_next(char *b, int hl, char **ob, int *oh) {
   get_prev_next(b,hl,ob,oh,1);
 }
 
+void get_first(char **ob, int *oh) {
+  *ob = (char *)malloc( strlen(STR(knh[3].meno))+1 ); strcpy(*ob,STR(knh[3].meno));
+  *oh = 1;
+}
+
 char *search;
 void fulltext_search(char *s) {
   search = Normalize(s);
