@@ -347,9 +347,9 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
     }
 
     free_scan_string();
-  } else if (search) {
+  } else if (search && strlen(search)) {
     char *b,*t;
-    int h,v;
+    int h,v,cnt;
 
     Prn(&out, "<title>Vyhľadávanie \"%s\"</title>\n"
         "</head><body>\n"
@@ -357,8 +357,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
         search, search);
 
     fulltext_search(search);
-
-    while (get_fulltext_result(&b, &h, &v, &t)) {
+    for (cnt=0; get_fulltext_result(&b, &h, &v, &t); cnt++) {
       int i,in,var;
       snprintf(buf, sizeof(buf), "%s%d", b,h);
       tmp = StringEncode(buf);
@@ -374,6 +373,10 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
         }
         if (!in && !var) Prn(&out, "%c", t[i]);
         if (t[i]=='>') in = 0;
+      }
+      if (cnt==1000) {
+        Prn(&out, "\n<p> Príliš veľa výsledkov!\n");
+        break;
       }
     }
 
