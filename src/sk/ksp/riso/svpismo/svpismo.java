@@ -7,6 +7,7 @@ import android.webkit.WebViewClient;
 import android.content.res.*;
 import android.util.Log;
 import android.widget.Button;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
@@ -75,9 +76,9 @@ public class svpismo extends Activity
         wv.getSettings().setBuiltInZoomControls(true);
         wv.setInitialScale(scale);
 
-        ((Button)findViewById(R.id.backBtn)).setOnClickListener(new View.OnClickListener() {
+        ((Button)findViewById(R.id.pgupBtn)).setOnClickListener(new View.OnClickListener() {
           public void onClick(View v) {
-            wv.goBack();
+            wv.pageUp(false);
           }
         });
    
@@ -198,6 +199,15 @@ public class svpismo extends Activity
           return super.onOptionsItemSelected(item);
       }
     }    
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+      if ((keyCode == KeyEvent.KEYCODE_BACK) && wv.canGoBack()) {
+        wv.goBack();
+        return true;
+      }
+      return super.onKeyDown(keyCode, event);
+    }
 
     public native String process(ByteBuffer db, long db_len, ByteBuffer css,
         long css_len, String querystring, boolean comments);

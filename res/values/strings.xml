@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Sv. Písmo</string>
-    <string name="back">Späť</string>
+    <string name="pgup">Späť</string>
     <string name="down">Dole</string>
     <string name="forward">Vpred</string>
     <string name="pgdn">Ďalej</string>
