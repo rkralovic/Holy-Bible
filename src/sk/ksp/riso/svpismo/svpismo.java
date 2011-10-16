@@ -7,6 +7,9 @@ import android.webkit.WebViewClient;
 import android.content.res.*;
 import android.util.Log;
 import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.Window;
 
@@ -29,16 +32,19 @@ public class svpismo extends Activity
 
     public WebView wv;
     boolean wv_initialized = false;
+    boolean comments;
+    String active_url;
 
     public void load(String url) {
       if (wv_initialized) {
         scale = (int)(wv.getScale()*100);
 //        Log.v("svpismo", "load: getScale " + scale);
       }
-      String cnt = process(db, db_len, css, css_len, url);
+      String cnt = process(db, db_len, css, css_len, url, comments);
       wv.loadData(cnt, "text/html", "utf-8");
       wv.setInitialScale(scale);
       wv_initialized = true;
+      active_url = url;
     }
 
     public void back() {
@@ -62,6 +68,7 @@ public class svpismo extends Activity
 
         SharedPreferences settings = getSharedPreferences(prefname, 0);
         scale = settings.getInt("scale", 100);
+        comments = settings.getBoolean("comments", true);
 //        Log.v("svpismo", "init with scale " + scale);
 
         wv = (WebView)findViewById(R.id.wv);
@@ -153,6 +160,7 @@ public class svpismo extends Activity
       SharedPreferences settings = getSharedPreferences(prefname, 0);
       SharedPreferences.Editor editor = settings.edit();
       editor.putInt("scale", scale);
+      editor.putBoolean("comments", comments);
       editor.commit();
     }
 
@@ -164,7 +172,35 @@ public class svpismo extends Activity
       super.onPause();
     }
 
-    public native String process(ByteBuffer db, long db_len, ByteBuffer css, long css_len, String querystring);
+    @Override
+    public boolean onCreateOptionsMenu( Menu menu ) {
+      // Inflate the currently selected menu XML resource.
+      MenuInflater inflater = getMenuInflater();
+      inflater.inflate( R.menu.menu, menu );
+      return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+      // Handle item selection
+      switch (item.getItemId()) {
+        case R.id.comments_on:
+          comments = true;
+          syncPreferences();
+          load(active_url);
+          return true;
+        case R.id.comments_off:
+          comments = false;
+          syncPreferences();
+          load(active_url);
+          return true;
+        default:
+          return super.onOptionsItemSelected(item);
+      }
+    }    
+
+    public native String process(ByteBuffer db, long db_len, ByteBuffer css,
+        long css_len, String querystring, boolean comments);
 
     static {
         System.loadLibrary("pismo");

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/comments_on"
+        android:title="Zobraziť komentáre">
+    </item>
+
+    <item android:id="@+id/comments_off"
+        android:title="Nezobraziť komentáre">
+    </item>
+
+</menu>
+
+

@@ -10,6 +10,8 @@
 
 char *zalm, *aleluja;
 int kalendar;
+int html_id;
+jboolean comments;
 
 struct strbuf kontext, out;
 
@@ -71,8 +73,17 @@ void Print(struct casti *_c) {
   do_search();
 
   while (get_result(&comment, &s)) {
-    if (!comment) Prn(&out, "%s\n", s);
-    else Prn(&out, "<span class=\"komentar\">(%s)</span>\n", s);
+    if (!comment) {
+      Prn(&out, "%s\n", s);
+    } else {
+      Prn(&out, "<span id=\"e%df\" ", html_id);
+      Prn(&out, "onclick=\"ToggleComment('e%d')\" ", html_id);
+      Prn(&out, "class=\"%skomentar\">(*)</span>\n", comments ? "skryty" : "", s);
+      Prn(&out, "<span id=\"e%d\" ", html_id);
+      Prn(&out, "onclick=\"ToggleComment('e%d')\" ", html_id);
+      Prn(&out, "class=\"%skomentar\">(%s)</span>\n", comments ? "" : "skryty", s);
+      html_id++;
+    }
   }
   free_search();
 
@@ -205,7 +216,7 @@ void TOC() {
   }
 }
 
-jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring) {
+jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring, jboolean _comments) {
   int d,m,y;
   char query[1024];
   const char *qstr;
@@ -220,6 +231,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   struct tm *tt;
 
   aleluja = zalm = NULL;
+  comments = _comments;
   db_len = _dblen;
   db = (*env)->GetDirectBufferAddress(env,_db);
   css = (*env)->GetDirectBufferAddress(env,_css);
@@ -230,6 +242,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   d = -1;
   m = -1;
   y = -1;
+  html_id=0;
 
   qstr = (*env)->GetStringUTFChars(env, querystring, NULL);
   __android_log_print(ANDROID_LOG_INFO, "svpismo", "qstr = %s\n", qstr);
@@ -284,19 +297,25 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
 
   Prn(&out, "\n--></style>");
 
-  Prn(&out, 
-      "<script type=\"text/javascript\"> \
-          function submitsearch() { \
-            bridge.loadit(\"pismo.cgi?search=\"+document.getElementById('searchstring').value ); \
-          } \
-       </script>");
-
-  Prn(&out, 
-      "<script type=\"text/javascript\"> \
-          function submitcoord() { \
-            bridge.loadit(\"pismo.cgi?c=\"+document.getElementById('zobraz').value ); \
-          } \
-       </script>");
+  Prn(&out, "<script type=\"text/javascript\">\n"
+      "function submitsearch() {\n"
+      "  bridge.loadit(\"pismo.cgi?search=\"+document.getElementById('searchstring').value );\n"
+      "}\n"
+      "function submitcoord() {\n"
+      "  bridge.loadit(\"pismo.cgi?c=\"+document.getElementById('zobraz').value );\n"
+      "}\n"
+      "function ToggleClass(eid) {\n"
+      "  if (document.getElementById(eid).className == \"komentar\") {\n"
+      "    document.getElementById(eid).className = \"skrytykomentar\";\n"
+      "  } else {\n"
+      "    document.getElementById(eid).className = \"komentar\";\n"
+      "  }\n"
+      "}\n"
+      "function ToggleComment(eid) {\n"
+      "  ToggleClass(eid);\n"
+      "  ToggleClass(eid+\"f\");\n"
+      "}\n"
+      "</script>\n");
 
   InitBuf(&kontext);
   Rst(&kontext);
