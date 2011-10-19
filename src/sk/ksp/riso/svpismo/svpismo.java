@@ -41,8 +41,9 @@ public class svpismo extends Activity
         scale = (int)(wv.getScale()*100);
 //        Log.v("svpismo", "load: getScale " + scale);
       }
-      String cnt = process(db, db_len, css, css_len, url, comments);
-      wv.loadData(cnt, "text/html", "utf-8");
+      String cnt = "data:text/html;charset=UTF-8," +
+                   process(db, db_len, css, css_len, url, comments);
+      wv.loadUrl(cnt);
       wv.setInitialScale(scale);
       wv_initialized = true;
       active_url = url;
