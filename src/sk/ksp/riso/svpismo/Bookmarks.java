@@ -48,7 +48,7 @@ public class Bookmarks extends Activity
 
     String getSuggestedLabel() {
       return URLDecoder.decode(getIntent().getStringExtra("location")
-        .replaceFirst("^.*?c=", "")
+        .replaceFirst("^.*?(c|in)=", "")
         .replaceFirst("&.*$", ""));
     }
 
