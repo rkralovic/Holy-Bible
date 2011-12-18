@@ -234,7 +234,7 @@ public class svpismo extends Activity
       switch (requestCode) {
         case Bookmarks.BOOKMARKS:
 	  if (resultCode == RESULT_OK) {
-		  // go to correct view
+            load(data.getStringExtra("location"));
 	  }
 	  break;
         default:

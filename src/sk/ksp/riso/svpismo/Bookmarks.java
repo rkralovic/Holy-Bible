@@ -97,6 +97,11 @@ public class Bookmarks extends Activity
       finish();
     }
 
+    public void bookmarkClicked(String location) {
+      setResult(RESULT_OK, new Intent().putExtra("location", location));
+      finish();
+    }
+
     @Override
     public void onResume() {
     
@@ -115,6 +120,18 @@ public class Bookmarks extends Activity
           }
         });
         ((ListView)findViewById(R.id.listBookmarks)).setAdapter(A);
+
+        final Bookmarks current_activity = this;
+        final SimpleCursorAdapter adapter = A;
+        ((ListView)findViewById(R.id.listBookmarks)).setOnItemClickListener(
+          new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+              Cursor c = adapter.getCursor();
+              c.moveToPosition(position);
+              current_activity.bookmarkClicked(c.getString(1));
+            }
+          }
+        );
       } else {
         A.changeCursor(c);
       }
