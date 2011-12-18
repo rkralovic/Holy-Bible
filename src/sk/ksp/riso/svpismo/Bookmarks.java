@@ -24,6 +24,7 @@ public class Bookmarks extends Activity
     static final int BOOKMARKS = 1;
 
     static final int DIALOG_LABEL = 1;
+    static final int DIALOG_EDIT = 2;
 
     SimpleCursorAdapter A;
     Db dbHelper;
@@ -53,17 +54,21 @@ public class Bookmarks extends Activity
 
     protected Dialog onCreateDialog(int id) {
       final Dialog dialog;
+      final EditText e;
+      final Bookmarks current_activity = this;
+      LayoutParams params;
+
       switch(id) {
       case DIALOG_LABEL:
         dialog = new Dialog(this);
         dialog.setContentView(R.layout.add_bookmark_dialog);
         dialog.setTitle(R.string.new_bookmark);
 
-        LayoutParams params = dialog.getWindow().getAttributes(); 
+        params = dialog.getWindow().getAttributes(); 
         params.width = LayoutParams.FILL_PARENT; 
         dialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params); 
 
-        final EditText e = (EditText) dialog.findViewById(R.id.bookmark_label);
+        e = (EditText) dialog.findViewById(R.id.bookmark_label);
         e.setText(getSuggestedLabel());
 
         ((Button)dialog.findViewById(R.id.cancel_bookmark)).setOnClickListener(new View.OnClickListener() {
@@ -72,12 +77,45 @@ public class Bookmarks extends Activity
           }
         });
 
-        final Bookmarks current_activity = this;
         ((Button)dialog.findViewById(R.id.add_bookmark)).setOnClickListener(new View.OnClickListener() {
           public void onClick(View v) {
             current_activity.addBookmark(e.getText().toString());
           }
         });
+        break;
+      case DIALOG_EDIT:
+        dialog = new Dialog(this);
+        dialog.setContentView(R.layout.edit_bookmark_dialog);
+        dialog.setTitle(R.string.edit_bookmark);
+
+        params = dialog.getWindow().getAttributes(); 
+        params.width = LayoutParams.FILL_PARENT; 
+        dialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params); 
+
+        e = (EditText) dialog.findViewById(R.id.bookmark_label);
+        e.setText(label_);
+
+        ((Button)dialog.findViewById(R.id.cancel_bookmark)).setOnClickListener(new View.OnClickListener() {
+          public void onClick(View v) {
+            dialog.dismiss();
+          }
+        });
+
+        ((Button)dialog.findViewById(R.id.delete_bookmark)).setOnClickListener(new View.OnClickListener() {
+          public void onClick(View v) {
+            dialog.dismiss();
+            current_activity.bookmarkDelete();
+          }
+        });
+
+        ((Button)dialog.findViewById(R.id.modify_bookmark)).setOnClickListener(new View.OnClickListener() {
+          public void onClick(View v) {
+            dialog.dismiss();
+            current_activity.label_ = e.getText().toString();
+            current_activity.bookmarkModify();
+          }
+        });
+
         break;
       default:
         dialog = null;
@@ -105,10 +143,34 @@ public class Bookmarks extends Activity
       finish();
     }
 
-    @Override
-    public void onResume() {
-    
-      Cursor c = db.rawQuery("select label as _id, location, position " +
+    public String rowid_, label_, location_;
+    float position_;
+
+    public void bookmarkEdit(String rowid, String label, String location, float position) {
+      rowid_ = rowid;
+      label_ = label;
+      location_ = location;
+      position_ = position;
+      showDialog(DIALOG_EDIT);
+    }
+
+    public void bookmarkDelete() {
+      db.delete(Db.BOOKMARKS_TABLE, "rowid="+rowid_, null);
+      A = null;
+      Refresh();
+    }
+
+    public void bookmarkModify() {
+      ContentValues c = new ContentValues();
+      c.put("label", label_);
+      c.put("stamp", System.currentTimeMillis());
+      db.update(Db.BOOKMARKS_TABLE, c, "rowid="+rowid_, null);
+      A = null;
+      Refresh();
+    }
+
+    void Refresh() {
+      Cursor c = db.rawQuery("select label as _id, location, position, rowid " +
                              "  from " + Db.BOOKMARKS_TABLE + " order by stamp desc", null);
 
       if (A==null) {
@@ -135,10 +197,26 @@ public class Bookmarks extends Activity
             }
           }
         );
+
+        ((ListView)findViewById(R.id.listBookmarks)).setOnItemLongClickListener(
+          new AdapterView.OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+              Cursor c = adapter.getCursor();
+              c.moveToPosition(position);
+              current_activity.bookmarkEdit(c.getString(3), c.getString(0), c.getString(1),
+                                            Float.parseFloat(c.getString(2)));
+              return true;
+            }
+          }
+        );
       } else {
         A.changeCursor(c);
       }
+    }
 
+    @Override
+    public void onResume() {
+      Refresh(); 
       super.onResume();
     }
 

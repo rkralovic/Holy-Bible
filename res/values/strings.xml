@@ -8,7 +8,10 @@
     <string name="comments_on">Zobraziť komentáre</string>
     <string name="comments_off">Nezobraziť komentáre</string>
     <string name="new_bookmark">Pridať záložku</string>
+    <string name="edit_bookmark">Upraviť záložku</string>
+    <string name="modify_bookmark_text">Upraviť</string>
     <string name="add_bookmark_text">Pridať</string>
     <string name="cancel_bookmark_text">Zrušiť</string>
     <string name="bookmark_label_text">Záložka: </string>
+    <string name="delete_bookmark_text">Zmazať</string>
 </resources>
