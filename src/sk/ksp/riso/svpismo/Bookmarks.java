@@ -1,24 +1,29 @@
 package sk.ksp.riso.svpismo;
 
 import android.app.Activity;
-import android.os.Bundle;
-import android.os.Bundle;
-import android.widget.*;
-import android.view.View;
-import android.content.Intent;
+import android.app.Dialog;
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.*;
 
 import android.util.Log;
 
 import java.lang.Float;
+import java.net.URLDecoder;
 
 import sk.ksp.riso.svpismo.Db;
 
 public class Bookmarks extends Activity
 {
     static final int BOOKMARKS = 1;
+
+    static final int DIALOG_LABEL = 1;
 
     SimpleCursorAdapter A;
     Db dbHelper;
@@ -35,20 +40,59 @@ public class Bookmarks extends Activity
       final Bookmarks current_activity = this;
       ((Button)findViewById(R.id.new_bookmark)).setOnClickListener(new View.OnClickListener() {
         public void onClick(View v) {
-	  Intent i = current_activity.getIntent();
-	  ContentValues r = new ContentValues();
-	  r.put("location", i.getStringExtra("location"));
-	  r.put("position", i.getFloatExtra("position", 0));
-	  r.put("stamp", System.currentTimeMillis());
-	  // fixme
-	  r.put("label", i.getStringExtra("location"));
-	  db.insert(Db.BOOKMARKS_TABLE, null, r);
-	  current_activity.bookmarkAdded();
+          current_activity.showDialog(DIALOG_LABEL);
 	}
       });
     }
 
-    public void bookmarkAdded() {
+    String getSuggestedLabel() {
+      return URLDecoder.decode(getIntent().getStringExtra("location")
+        .replaceFirst("^.*?c=", "")
+        .replaceFirst("&.*$", ""));
+    }
+
+    protected Dialog onCreateDialog(int id) {
+      final Dialog dialog;
+      switch(id) {
+      case DIALOG_LABEL:
+        dialog = new Dialog(this);
+        dialog.setContentView(R.layout.add_bookmark_dialog);
+        dialog.setTitle(R.string.new_bookmark);
+
+        LayoutParams params = dialog.getWindow().getAttributes(); 
+        params.width = LayoutParams.FILL_PARENT; 
+        dialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params); 
+
+        final EditText e = (EditText) dialog.findViewById(R.id.bookmark_label);
+        e.setText(getSuggestedLabel());
+
+        ((Button)dialog.findViewById(R.id.cancel_bookmark)).setOnClickListener(new View.OnClickListener() {
+          public void onClick(View v) {
+            dialog.dismiss();
+          }
+        });
+
+        final Bookmarks current_activity = this;
+        ((Button)dialog.findViewById(R.id.add_bookmark)).setOnClickListener(new View.OnClickListener() {
+          public void onClick(View v) {
+            current_activity.addBookmark(e.getText().toString());
+          }
+        });
+        break;
+      default:
+        dialog = null;
+      }
+      return dialog;
+    }
+
+    public void addBookmark(String label) {
+      Intent i = getIntent();
+      ContentValues r = new ContentValues();
+      r.put("location", i.getStringExtra("location"));
+      r.put("position", i.getFloatExtra("position", 0));
+      r.put("stamp", System.currentTimeMillis());
+      r.put("label", label);
+      db.insert(Db.BOOKMARKS_TABLE, null, r);
       setResult(RESULT_CANCELED, null);
       finish();
     }

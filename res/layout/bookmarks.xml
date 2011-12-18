@@ -19,7 +19,7 @@
     android:orientation="vertical">
 
     <Button android:id="@+id/new_bookmark" android:text="@string/new_bookmark"
-      android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+      android:layout_width="match_parent" android:layout_height="wrap_content"/>
 
     <ListView android:id="@+id/listBookmarks"
       android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1"/>
