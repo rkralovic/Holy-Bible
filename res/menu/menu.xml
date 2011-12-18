@@ -2,12 +2,8 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/comments_on"
-        android:title="Zobraziť komentáre">
-    </item>
-
-    <item android:id="@+id/comments_off"
-        android:title="Nezobraziť komentáre">
+    <item android:id="@+id/comments_toggle"
+        android:title="Zobraziť/skryť komentáre">
     </item>
 
 </menu>

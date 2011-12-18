@@ -186,13 +186,8 @@ public class svpismo extends Activity
     public boolean onOptionsItemSelected(MenuItem item) {
       // Handle item selection
       switch (item.getItemId()) {
-        case R.id.comments_on:
-          comments = true;
-          syncPreferences();
-          load(active_url);
-          return true;
-        case R.id.comments_off:
-          comments = false;
+        case R.id.comments_toggle:
+          comments = !comments;
           syncPreferences();
           load(active_url);
           return true;
@@ -215,5 +210,15 @@ public class svpismo extends Activity
 
     static {
         System.loadLibrary("pismo");
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+      if (comments) {
+        menu.findItem(R.id.comments_toggle).setTitle(R.string.comments_off);
+      } else {
+        menu.findItem(R.id.comments_toggle).setTitle(R.string.comments_on);
+      }
+      return super.onPrepareOptionsMenu(menu);
     }
 }
