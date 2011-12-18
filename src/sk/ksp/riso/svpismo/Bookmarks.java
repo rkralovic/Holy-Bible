@@ -97,15 +97,18 @@ public class Bookmarks extends Activity
       finish();
     }
 
-    public void bookmarkClicked(String location) {
-      setResult(RESULT_OK, new Intent().putExtra("location", location));
+    public void bookmarkClicked(String location, float position) {
+      setResult(RESULT_OK, new Intent()
+          .putExtra("location", location)
+          .putExtra("position", position)
+      );
       finish();
     }
 
     @Override
     public void onResume() {
     
-      Cursor c = db.rawQuery("select label as _id, location " +
+      Cursor c = db.rawQuery("select label as _id, location, position " +
                              "  from " + Db.BOOKMARKS_TABLE + " order by stamp desc", null);
 
       if (A==null) {
@@ -128,7 +131,7 @@ public class Bookmarks extends Activity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
               Cursor c = adapter.getCursor();
               c.moveToPosition(position);
-              current_activity.bookmarkClicked(c.getString(1));
+              current_activity.bookmarkClicked(c.getString(1), Float.parseFloat(c.getString(2)));
             }
           }
         );

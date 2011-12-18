@@ -31,6 +31,7 @@ public class svpismo extends Activity
     MappedByteBuffer db, css;
     long db_len, css_len;
     int scale;
+    float scroll_to = -1;
 
     public WebView wv;
     boolean wv_initialized = false;
@@ -144,6 +145,22 @@ public class svpismo extends Activity
 //              Log.v("svpismo", "onScaleChanged " + parent.scale);
             }
 
+            @Override
+            public void onPageFinished(WebView view, String url) {
+              super.onPageFinished(view, url);
+              // Ugly hack. But we have no reliable notification when is webview scrollable.
+              final int Y = (int)(parent.scroll_to*view.getContentHeight());
+              final WebView wv = view;
+              view.postDelayed(new Runnable() {
+                public void run() {
+                  if (parent.scroll_to >= 0) {
+                    wv.scrollTo(0, Y);
+                  }
+                  parent.scroll_to = -1;
+                }
+              }, 100);
+            }
+
           });
 
         } catch (IOException e) {
@@ -234,6 +251,7 @@ public class svpismo extends Activity
       switch (requestCode) {
         case Bookmarks.BOOKMARKS:
 	  if (resultCode == RESULT_OK) {
+            scroll_to = data.getFloatExtra("position", 0);
             load(data.getStringExtra("location"));
 	  }
 	  break;
