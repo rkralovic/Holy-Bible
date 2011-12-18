@@ -149,16 +149,16 @@ public class svpismo extends Activity
             public void onPageFinished(WebView view, String url) {
               super.onPageFinished(view, url);
               // Ugly hack. But we have no reliable notification when is webview scrollable.
-              final int Y = (int)(parent.scroll_to*view.getContentHeight());
               final WebView wv = view;
               view.postDelayed(new Runnable() {
                 public void run() {
                   if (parent.scroll_to >= 0) {
+                    int Y = (int)(parent.scroll_to*wv.getContentHeight());
                     wv.scrollTo(0, Y);
                   }
                   parent.scroll_to = -1;
                 }
-              }, 100);
+              }, 400);
             }
 
           });
