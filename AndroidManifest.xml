@@ -24,5 +24,8 @@
                 <data android:scheme="svpismo" />
             </intent-filter>
         </activity>
+        <activity android:name="Bookmarks"
+                  android:label="@string/app_name">
+        </activity>
     </application>
 </manifest> 

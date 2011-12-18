@@ -16,6 +16,7 @@ import android.view.Window;
 
 import java.lang.Object;
 import sk.ksp.riso.svpismo.JSInterface;
+import sk.ksp.riso.svpismo.Bookmarks;
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
@@ -191,6 +192,12 @@ public class svpismo extends Activity
           syncPreferences();
           load(active_url);
           return true;
+        case R.id.bookmarks:
+	  Intent i = new Intent(this, Bookmarks.class);
+	  i.putExtra("location", active_url); 
+	  i.putExtra("position", wv.getScrollY() / (float)wv.getContentHeight());
+	  startActivityForResult(i, Bookmarks.BOOKMARKS);
+          return true;
         default:
           return super.onOptionsItemSelected(item);
       }
@@ -221,4 +228,17 @@ public class svpismo extends Activity
       }
       return super.onPrepareOptionsMenu(menu);
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+      switch (requestCode) {
+        case Bookmarks.BOOKMARKS:
+	  if (resultCode == RESULT_OK) {
+		  // go to correct view
+	  }
+	  break;
+        default:
+          super.onActivityResult(requestCode, resultCode, data);
+      }
+    }    
 }
