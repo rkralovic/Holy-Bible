@@ -16,6 +16,7 @@ import android.util.Log;
 
 import java.lang.Float;
 import java.net.URLDecoder;
+import java.util.regex.Pattern;
 
 import sk.ksp.riso.svpismo.Db;
 
@@ -47,7 +48,21 @@ public class Bookmarks extends Activity
     }
 
     String getSuggestedLabel() {
-      return URLDecoder.decode(getIntent().getStringExtra("location")
+      String query = getIntent().getStringExtra("location");
+      if (Pattern.matches(".*[?&]d=.*", query) &&
+          Pattern.matches(".*[?&]m=.*", query) &&
+          Pattern.matches(".*[?&]y=.*", query)) {
+        int d = Integer.parseInt(query.replaceFirst("^.*[?&]d=", "").replaceFirst("&.*$", ""));
+        int m = Integer.parseInt(query.replaceFirst("^.*[?&]m=", "").replaceFirst("&.*$", ""));
+        int y = Integer.parseInt(query.replaceFirst("^.*[?&]y=", "").replaceFirst("&.*$", ""));
+        return "Liturgické čítania na " + d + ". " + m + ". " + y;
+      }
+      if (Pattern.matches(".*[?&]search=.*", query)) {
+        return "Výsledky vyhľadávania pre '" + URLDecoder.decode(query
+          .replaceFirst("^.*?search=", "")
+          .replaceFirst("&.*$", "")) + "'";
+      }
+      return URLDecoder.decode(query
         .replaceFirst("^.*?(c|in)=", "")
         .replaceFirst("&.*$", ""));
     }
