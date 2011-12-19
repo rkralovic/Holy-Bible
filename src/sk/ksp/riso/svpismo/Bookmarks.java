@@ -67,6 +67,23 @@ public class Bookmarks extends Activity
         .replaceFirst("&.*$", ""));
     }
 
+    protected void onPrepareDialog(int id, Dialog dialog, Bundle b) {
+      final EditText e;
+      final Bookmarks current_activity = this;
+
+      switch(id) {
+      case DIALOG_LABEL:
+        e = (EditText) dialog.findViewById(R.id.bookmark_label);
+        e.setText(getSuggestedLabel());
+        break;
+      case DIALOG_EDIT:
+        e = (EditText) dialog.findViewById(R.id.bookmark_label);
+        e.setText(label_);
+        Log.v("svpismo", "label_ = " + label_);
+        break;
+      }
+    }
+
     protected Dialog onCreateDialog(int id) {
       final Dialog dialog;
       final EditText e;
@@ -84,7 +101,6 @@ public class Bookmarks extends Activity
         dialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params); 
 
         e = (EditText) dialog.findViewById(R.id.bookmark_label);
-        e.setText(getSuggestedLabel());
 
         ((Button)dialog.findViewById(R.id.cancel_bookmark)).setOnClickListener(new View.OnClickListener() {
           public void onClick(View v) {
@@ -108,7 +124,6 @@ public class Bookmarks extends Activity
         dialog.getWindow().setAttributes((android.view.WindowManager.LayoutParams) params); 
 
         e = (EditText) dialog.findViewById(R.id.bookmark_label);
-        e.setText(label_);
 
         ((Button)dialog.findViewById(R.id.cancel_bookmark)).setOnClickListener(new View.OnClickListener() {
           public void onClick(View v) {
@@ -125,9 +140,10 @@ public class Bookmarks extends Activity
 
         ((Button)dialog.findViewById(R.id.modify_bookmark)).setOnClickListener(new View.OnClickListener() {
           public void onClick(View v) {
+            boolean update = ((CheckBox)dialog.findViewById(R.id.update_label)).isChecked();
             dialog.dismiss();
             current_activity.label_ = e.getText().toString();
-            current_activity.bookmarkModify();
+            current_activity.bookmarkModify(update);
           }
         });
 
@@ -175,10 +191,15 @@ public class Bookmarks extends Activity
       Refresh();
     }
 
-    public void bookmarkModify() {
+    public void bookmarkModify(boolean update) {
       ContentValues c = new ContentValues();
       c.put("label", label_);
       c.put("stamp", System.currentTimeMillis());
+      if (update) {
+        Intent i = getIntent();
+        c.put("location", i.getStringExtra("location"));
+        c.put("position", i.getFloatExtra("position", 0));
+      }
       db.update(Db.BOOKMARKS_TABLE, c, "rowid="+rowid_, null);
       A = null;
       Refresh();
