@@ -62,6 +62,9 @@ public class Bookmarks extends Activity
           .replaceFirst("^.*?search=", "")
           .replaceFirst("&.*$", "")) + "'";
       }
+      if (Pattern.matches(".*[?&]obsah=.*", query)) {
+        return "Obsah";
+      }
       return URLDecoder.decode(query
         .replaceFirst("^.*?(c|in)=", "")
         .replaceFirst("&.*$", ""));

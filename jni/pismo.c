@@ -216,12 +216,28 @@ void TOC() {
   }
 }
 
+void ShortTOC() {
+  char *b1, *b2, *q;
+  int h1, h2, lasth;
+  get_first(&b1, &h1);
+  while (b1 != NULL) {
+    Prn(&out, "<span style=\"display: inline-block; min-width:7em;\">%s:&nbsp;<a href=\"pismo.cgi?c=%s%d\">%d</a>-", b1, b1, h1, h1);
+    for (get_next(b1, h1, &b2, &h2); b2!=NULL && !strcmp(b1,b2); q=b2, get_next(b2, h2, &b2, &h2), free(q)) lasth = h2;
+    Prn(&out, "<a href=\"pismo.cgi?c=%s%d\">%d</a></span>", b1, lasth, lasth);
+    Prn(&out, "\n");
+    free(b1);
+    b1 = b2;
+    h1 = h2;
+  }
+}
+
 jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring, jboolean _comments) {
   int d,m,y;
   char query[1024];
   const char *qstr;
   char *coord=NULL;
   char *search=NULL;
+  char *obsah=NULL;
   char buf[1024];
   char *tmp;
   jstring jout;
@@ -260,6 +276,12 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
       query[0]=0;
       sscanf(s, "%1000[^&]", query);
       coord=StringDecode(query);
+    }
+    s = strstr(qstr, "obsah="); 
+    if (s) {
+      query[0]=0;
+      sscanf(s+6, "%1000[^&]", query);
+      obsah = StringDecode(query);
     }
     s = strstr(qstr, "search="); 
     if (s) {
@@ -421,15 +443,21 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
     */
     free_scan_string();
 
-  } else {
+  } else if (obsah) {
     Prn(&out, "<title>Obsah</title>\n"
         "</head><body>\n"
         "<div class=\"nadpis\">Obsah</div>\n\n");
     TOC();
+  } else {
+    Prn(&out, "<title>Obsah</title>\n"
+        "</head><body>\n"
+        "<div class=\"nadpis\">Sväté Písmo</div>\n\n");
+    ShortTOC();
   }
   if (zalm) free(zalm);
   if (aleluja) free(aleluja);
   if (coord) free(coord);
+  if (obsah) free(obsah);
   // FIXME: leaks from the structure!
 
   Prn(&out, "<p>\n"
@@ -439,7 +467,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
       "<input type=\"text\" id=\"searchstring\">\n"
       "<button onClick=\"submitsearch()\">Hľadaj</button>\n");
   Prn(&out, "<p>\n"
-      "<a href=\"pismo.cgi\">Obsah</a>\n");
+      "<a href=\"pismo.cgi?obsah=long\">Obsah</a>\n");
     
   Prn(&out, "</body></html>\n");
 

@@ -124,7 +124,7 @@ public class svpismo extends Activity
             load("pismo.cgi?" + I.getData().getQuery());
           } else {
             if (wv.restoreState(savedInstanceState) == null)
-              load("pismo.cgi?c=Jn1,1");
+              load("pismo.cgi");
           }
 
           wv.getSettings().setJavaScriptEnabled(true);

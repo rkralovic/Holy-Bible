@@ -6,7 +6,7 @@
     <string name="forward">Vpred</string>
     <string name="pgdn">Ďalej</string>
     <string name="comments_on">Zobraziť komentáre</string>
-    <string name="comments_off">Nezobraziť komentáre</string>
+    <string name="comments_off">Skryť komentáre</string>
     <string name="new_bookmark">Pridať záložku</string>
     <string name="edit_bookmark">Upraviť záložku</string>
     <string name="modify_bookmark_text">Upraviť</string>
