@@ -95,19 +95,34 @@ void Process(struct citania *l) {
   int i;
   for (i=0; l!=NULL; i++, l=l->n) {
     struct varianty *v;
+    int first;
 
-    if (kalendar) {
-      if (i%2 && l->n) Prn(&out, "<div class=\"citanie\">Žalm</div>\n\n");
+    if (l->tag != NULL) {
+      i = 0;
+      Prn(&out, "<div class=\"tagMajor\">%s</div>\n\n", l->tag);
+    }
+    if (l->l && kalendar) {
+      char *a = NULL;
+      for (v = l->l; v != NULL; v = v->n) {
+        if (v->l && v->tag) {
+          a = v->tag;
+          break;
+        }
+      }
+
+      if (i%2 && l->n) {
+        Prn(&out, "<div class=\"citanie\">Žalm</div>\n\n");
+        Prn(&out, "<p><span class=\"redbold\">R: </span><span class=\"it\">%s</span></p>\n\n", a ? a : zalm);
+      }
       else if (l->n) Prn(&out, "<div class=\"citanie\">%d. čítanie</div>\n\n", i/2 + 1);
       else {
-        Prn(&out, "<p><span class=\"redbold\">Aleluja: </span><span class=\"it\">%s</span></p>\n\n", aleluja);
+        Prn(&out, "<p><span class=\"redbold\">Aleluja: </span><span class=\"it\">%s</span></p>\n\n", a ? a : aleluja);
         Prn(&out, "<div class=\"citanie\">Evanjelium</div>\n\n");
       }
 
-      if (i==1 && l->n)  Prn(&out, "<p><span class=\"redbold\">R: </span><span class=\"it\">%s</span></p>\n\n", zalm);
     }
 
-    for (v=l->l; v!=NULL; v=v->n) {
+    for (first = 1, v = l->l; v != NULL; v = v->n) {
 /*
       struct casti *c;
       char K[MAXLEN];
@@ -125,9 +140,13 @@ void Process(struct citania *l) {
       Prn(&out, "</div>\n\n");
 */
 
-      Print(v->l);
-
-      if (v->n) Prn(&out, "<div class=\"varianta\">Alebo:</div>\n\n");
+      if (v->l) {
+        if (!first) Prn(&out, "<div class=\"varianta\">Alebo:</div>\n\n");
+        Print(v->l);
+        first = 0;
+      } else if (v->tag) {
+        Prn(&out, "<div class=\"tagMinor\">%s</div>\n\n", v->tag);
+      }
     }
   }
 }

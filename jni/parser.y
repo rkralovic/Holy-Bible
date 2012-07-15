@@ -64,7 +64,7 @@ citania:  citanie citania { NEW($$, citania, $2.citania); CPY($$.citania->l, $1.
 
 citanie: varianta OR citanie   { CPY($$.varianty, $1.varianty); CPY($$.varianty->n, $3.varianty); }
     | varianta oddelovac       { CPY($$.varianty, $1.varianty); }
-    | varianta TAG_MINOR oddelovac  { CPY($$.varianty, $1.varianty); $$.varianty->tag = $2.id; }
+    | varianta DESC oddelovac  { CPY($$.varianty, $1.varianty); $$.varianty->tag = $2.id; }
     | TAG_MINOR                { NEW($$, varianty, NULL); $$.varianty->tag = $1.id; }
     | error oddelovac          { NEW($$, varianty, NULL); $$.varianty->l = NULL; }
 ;

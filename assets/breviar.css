@@ -9,6 +9,8 @@ var { color: #999999; }
 .kniha { text-align: justify; }
 */
 .redsmall { color: #ff0000; font-size: 80%; }
+.tagMajor { color: #ff0000; font-size: 80%; }
+.tagMinor { color: #ff0000; font-size: 80%; }
 /* .komentar { color: DarkBlue; font-size: 80%; text-align: justify; } */
 .komentar { color: DarkBlue; font-size: 80%; }
 .skrytykomentar { display: none; }
