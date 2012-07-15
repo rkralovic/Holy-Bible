@@ -36,9 +36,10 @@ IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]o
 \([^)]*\)  // skip parentheses
 \/al\.[^/]*\/  return OR;
 \/kr\.[^/]*\/  return OR;
+:[^\r\n]*\r?\n  yylval.id = strdup(yytext); return DESC;
 \/[^/]*\/  // skip comments // strncpy(yylval.id, yytext, sizeof(yylval.id)); return COMMENT;
-\<[^>]*\>    strncpy(yylval.id, yytext, sizeof(yylval.id)); return REGEXP;
-{IDLIST}  strncpy(yylval.id, yytext, sizeof(yylval.id)); despace(yylval.id); return ID;
+\<[^>]*\>    yylval.id = strdup(yytext); return REGEXP;
+{IDLIST}  yylval.id = strdup(yytext); despace(yylval.id); return ID;
 [0-9]+    sscanf(yytext, "%d", &yylval.num); return NUM;
 \-        return DASH;
 \xe2\x80\x93  return DASH;
@@ -46,8 +47,8 @@ IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]o
 \.        return DOT;
 \,        return COMMA;
 \;        return SEMICOLON;
-\n        //
-{ALPHA}+    strncpy(yylval.id, yytext, sizeof(yylval.id)); return ID;
+\r\n      return SEMICOLON;  //
+{ALPHA}+    yylval.id = strdup(yytext); return ID;
 .         yyerror("cannot scan!"); return ERROR;
 
 %%

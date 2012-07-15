@@ -30,7 +30,7 @@ union node_type {
   struct citania *citania;
   struct varianty *varianty;
   struct casti *casti;
-  char id[20];
+  char* id;
   int num;
 };
 
