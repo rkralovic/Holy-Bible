@@ -41,12 +41,11 @@ char* duptag(char *s) {
 %}
 
 extern YYSTYPE yylval;
-ALNUM  [^\n -.,;"'\\<>()*]
-ALPHA  [^\n -.,;"'\\0-9<>()*]
+ALNUM  [^\r\n -.,:;"'\\<>()*]
+ALPHA  [^\r\n -.,:;"'\\0-9<>()*]
 IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]or|2\ *[kK]or|1\ *[sS]ol|2\ *[sS]ol|1\ *[tT]im|2\ *[tT]im|1\ *[pP]t|2\ *[pP]t|1\ *[jJ]n|2\ *[jJ]n|3\ *[jJ]n|1\ *[mM]ach|2\ *[mM]ach|[a-zA-Z]{ALPHA}+
 
 %%
-\         // skip spaces
 \([^)]*\)  // skip parentheses
 \/al\.[^/]*\/  return OR;
 \/kr\.[^/]*\/  return OR;
@@ -64,7 +63,9 @@ IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]o
 \.        return DOT;
 \,        return COMMA;
 \;        return SEMICOLON;
-\r\n      return SEMICOLON;  //
+\r        return SEMICOLON;
+\n        return SEMICOLON;
+\         // skip spaces
 {ALPHA}+    yylval.id = duptag(yytext); return ID;
 .         yyerror("cannot scan!"); return ERROR;
 

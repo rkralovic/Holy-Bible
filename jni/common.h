@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <string.h>
-#include <android/log.h>
 #include <stdlib.h>
+
+#ifndef NOANDROID
+#include <android/log.h>
+#endif
 
 extern void yyerror(const char *);
 extern int yylex();

@@ -14,7 +14,7 @@
 
 #define MAX_RES 65536
 
-static const void *base;
+static void *base;
 void *db;
 int db_len;
 
@@ -88,7 +88,33 @@ static char *Normalize(const char *s) {
   return out;
 }
 
+#ifdef NOANDROID
+#define DB "pismo.bin"
 
+void db_close() {
+  munmap(base, db_len);
+  fclose(db);
+}
+
+int db_init() {
+  struct stat buf;
+  if (!(db=fopen(DB, "r"))) return -1;
+  fstat(fileno(db), &buf);
+  db_len = buf.st_size;
+  base = mmap(NULL, db_len, PROT_READ, MAP_PRIVATE, fileno(db), 0);
+
+  hdr = (struct header *)base;
+  if (hdr->signature!=SIGNATURE) {
+    db_close();
+    fprintf(stderr, "bad db signature\n");
+    return -1;
+  }
+
+  knh = (struct kniha *)(base+hdr->knihy);
+  
+  return 1;
+}
+#else
 void db_close() {
 }
 
@@ -100,14 +126,13 @@ int db_init() {
   if (hdr->signature!=SIGNATURE) {
     __android_log_print(ANDROID_LOG_INFO, "svpismo", "db_init: wrong signature %x != %x\n", hdr->signature, SIGNATURE);
     db_close();
-    //fprintf(stderr, "bad db signature\n");
     return -1;
   }
-
   knh = (struct kniha *)(base+hdr->knihy);
   
   return 1;
 }
+#endif
 
 static int cmp(const char *a, const char *b) {
   char *_a = Normalize(a);
@@ -284,7 +309,7 @@ void get_prev_next(char *b, int hl, char **ob, int *oh, int dir) {
   if (dir<0) {
     while (_b>=0 && hl==0) {
       _b--;
-      if (b>=0) hl = knh[_b].n_hlav;
+      if (_b>=0) hl = knh[_b].n_hlav;
     }
   } else {
     while (_b < hdr->n_knihy && hl > knh[_b].n_hlav) {
@@ -310,7 +335,7 @@ void get_next(char *b, int hl, char **ob, int *oh) {
 }
 
 void get_first(char **ob, int *oh) {
-  *ob = (char *)malloc( strlen(STR(knh[3].meno))+1 ); strcpy(*ob,STR(knh[3].meno));
+  *ob = strdup(STR(knh[3].meno));
   *oh = 1;
 }
 
