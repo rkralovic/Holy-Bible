@@ -38,13 +38,13 @@ static YYSTYPE citaniaMerge(YYSTYPE x0, YYSTYPE x1) { x0.citania->cnt++; return 
 
 %}
 
-%token OR COMMENT REGEXP ID NUM DASH DOT COMMA SEMICOLON ERROR DESC
+%token OR COMMENT REGEXP ID NUM DASH DOT COMMA SEMICOLON ERROR DESC TAG_MINOR TAG_MAJOR
 %token END 0
 %glr-parser
-%destructor { free($$.casti); } suradnice casti;
-%destructor { free($$.varianty); } varianta citanie;
-%destructor { free($$.citania); } citania;
-%destructor { free($$.id); } REGEXP ID DESC;
+%destructor { free_casti($$.casti); } suradnice casti;
+%destructor { free_varianty($$.varianty); } varianta citanie;
+%destructor { free_citania($$.citania); } citania;
+%destructor { if ($$.id != NULL) free($$.id); } REGEXP ID DESC TAG_MINOR TAG_MAJOR;
 
 %%
 
