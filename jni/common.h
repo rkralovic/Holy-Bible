@@ -8,12 +8,14 @@ extern int yylex();
 
 struct citania {
   int cnt;
+  char *tag;
   struct varianty *l;
   struct citania *n;
 };
 
 struct varianty {
   int cnt;
+  char *tag;
   struct casti *l;
   struct varianty *n;
 };
