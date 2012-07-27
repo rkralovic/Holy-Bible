@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.content.res.*;
-import android.util.Log;
+//import android.util.Log;
 import android.widget.Button;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -14,13 +14,11 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.Window;
 
-import java.lang.Object;
 import sk.ksp.riso.svpismo.JSInterface;
 import sk.ksp.riso.svpismo.Bookmarks;
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
-import android.net.Uri;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
