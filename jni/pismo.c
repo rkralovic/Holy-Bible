@@ -466,8 +466,6 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   Prn(&out, "<p>\n"
       "<input type=\"text\" id=\"searchstring\">\n"
       "<button onClick=\"submitsearch()\">Hľadaj</button>\n");
-  Prn(&out, "<p>\n"
-      "<a href=\"pismo.cgi?obsah=long\">Obsah</a>\n");
     
   Prn(&out, "</body></html>\n");
 
