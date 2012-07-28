@@ -15,4 +15,5 @@
     <string name="bookmark_label_text">Záložka: </string>
     <string name="update_label_text">Aktualizovať pozíciu</string>
     <string name="delete_bookmark_text">Zmazať</string>
+    <string name="toc_text">Obsah</string>
 </resources>

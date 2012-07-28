@@ -35,6 +35,7 @@ public class svpismo extends Activity
     boolean wv_initialized = false;
     boolean comments;
     String active_url;
+    final String toc_url = "pismo.php?obsah=long";
 
     public void load(String url) {
       if (wv_initialized) {
@@ -206,6 +207,9 @@ public class svpismo extends Activity
     public boolean onOptionsItemSelected(MenuItem item) {
       // Handle item selection
       switch (item.getItemId()) {
+        case R.id.toc:
+          load(toc_url);
+          return true;
         case R.id.comments_toggle:
           comments = !comments;
           syncPreferences();
@@ -240,6 +244,9 @@ public class svpismo extends Activity
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+      if ((active_url != toc_url) != (menu.findItem(R.id.toc).isVisible())) {
+    	  menu.findItem(R.id.toc).setVisible(active_url != toc_url);
+      };
       if (comments) {
         menu.findItem(R.id.comments_toggle).setTitle(R.string.comments_off);
       } else {

@@ -2,6 +2,7 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item android:id="@+id/toc" android:title="@string/toc_text"></item>
     <item android:id="@+id/comments_toggle"
         android:title="Zobraziť/skryť komentáre">
     </item>
