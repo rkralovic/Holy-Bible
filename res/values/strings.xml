@@ -5,8 +5,6 @@
     <string name="down">Dole</string>
     <string name="forward">Vpred</string>
     <string name="pgdn">Ďalej</string>
-    <string name="comments_on">Zobraziť komentáre</string>
-    <string name="comments_off">Skryť komentáre</string>
     <string name="new_bookmark">Pridať záložku</string>
     <string name="edit_bookmark">Upraviť záložku</string>
     <string name="modify_bookmark_text">Upraviť</string>
@@ -16,4 +14,9 @@
     <string name="update_label_text">Aktualizovať pozíciu</string>
     <string name="delete_bookmark_text">Zmazať</string>
     <string name="toc_text">Obsah</string>
+    <string name="comments">Vysvetlivky</string>
+    <string name="comments_preference_description">Zobrazenie vysvetliviek v texte</string>
+    <string name="preferences_text">Nastavenia</string>
+    <string name="navbar">Navigačné tlačidlá</string>
+    <string name="navbar_preference_description">Zobrazenie pruhu s navigačnými tlačidlami</string>
 </resources>
