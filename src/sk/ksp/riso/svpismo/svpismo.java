@@ -58,13 +58,6 @@ public class svpismo extends Activity
       wv.goForward();
     }
 
-    @Override
-    public void onUserInteraction() {
-      syncPreferences();
-//      Log.v("svpismo", "user interaction");
-      super.onUserInteraction();
-    }
-
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
