@@ -122,10 +122,8 @@ public class svpismo extends Activity
           if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
             load("pismo.cgi?" + I.getData().getQuery());
           } else {
-            if (wv.restoreState(savedInstanceState) == null) {
-              scroll_to = settings.getFloat("position", 0);
-              load(settings.getString("location", "pismo.cgi"));
-            }
+            if (wv.restoreState(savedInstanceState) == null)
+              load("pismo.cgi");
           }
 
           wv.getSettings().setJavaScriptEnabled(true);
@@ -182,8 +180,6 @@ public class svpismo extends Activity
       SharedPreferences.Editor editor = settings.edit();
       editor.putInt("scale", scale);
       editor.putBoolean("comments", comments);
-      editor.putString("location", active_url); 
-      editor.putFloat("position", wv.getScrollY() / (float)wv.getContentHeight());
       editor.commit();
     }
 
