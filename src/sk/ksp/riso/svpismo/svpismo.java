@@ -188,7 +188,7 @@ public class svpismo extends Activity
       wv.setInitialScale(scale);
 //      Log.v("svpismo", "onStop " + scale);
       syncPreferences();
-      super.onPause();
+      super.onStop();
     }
 
     @Override
