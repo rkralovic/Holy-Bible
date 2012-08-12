@@ -7,6 +7,7 @@ import android.webkit.WebViewClient;
 import android.content.res.*;
 //import android.util.Log;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +36,8 @@ public class svpismo extends Activity
     boolean wv_initialized = false;
     boolean comments;
     String active_url;
+    float position;
+    String location;
     final String toc_url = "pismo.php?obsah=long";
 
     public void load(String url) {
@@ -69,9 +72,7 @@ public class svpismo extends Activity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.svpismo);
 
-        SharedPreferences settings = getSharedPreferences(prefname, 0);
-        scale = settings.getInt("scale", 100);
-        comments = settings.getBoolean("comments", true);
+        SharedPreferences settings = getPreferences();
 //        Log.v("svpismo", "init with scale " + scale);
 
         wv = (WebView)findViewById(R.id.wv);
@@ -101,6 +102,8 @@ public class svpismo extends Activity
             wv.pageDown(false);
           }
         });
+
+        updateNavbar(settings.getBoolean("navbar", true));
 
         try {
           {
@@ -167,6 +170,13 @@ public class svpismo extends Activity
         }
     }
 
+    private SharedPreferences getPreferences() {
+      SharedPreferences settings = getSharedPreferences(prefname, 0);
+      scale = settings.getInt("scale", 100);
+      comments = settings.getBoolean("comments", true);
+      return settings;
+    }
+
     protected void onSaveInstanceState(Bundle outState) {
       scale = (int)(wv.getScale()*100);
       wv.setInitialScale(scale);
@@ -183,6 +193,11 @@ public class svpismo extends Activity
       editor.commit();
     }
 
+    protected void onStart() {
+      getPreferences();
+      super.onStart();
+    }
+    
     protected void onStop(){
       scale = (int)(wv.getScale()*100);
       wv.setInitialScale(scale);
@@ -206,10 +221,9 @@ public class svpismo extends Activity
         case R.id.toc:
           load(toc_url);
           return true;
-        case R.id.comments_toggle:
-          comments = !comments;
-          syncPreferences();
-          load(active_url);
+        case R.id.preferences:
+          Intent settingsActivity = new Intent(getBaseContext(), Preferences.class);
+          startActivityForResult(settingsActivity, Preferences.PREFERENCES);
           return true;
         case R.id.bookmarks:
 	  Intent i = new Intent(this, Bookmarks.class);
@@ -220,6 +234,11 @@ public class svpismo extends Activity
         default:
           return super.onOptionsItemSelected(item);
       }
+    }
+
+    private void reloadView() {
+      scroll_to = wv.getScrollY() / (float)wv.getContentHeight();
+      load(active_url);
     }    
 
     @Override
@@ -243,11 +262,6 @@ public class svpismo extends Activity
       if ((active_url != toc_url) != (menu.findItem(R.id.toc).isVisible())) {
     	  menu.findItem(R.id.toc).setVisible(active_url != toc_url);
       };
-      if (comments) {
-        menu.findItem(R.id.comments_toggle).setTitle(R.string.comments_off);
-      } else {
-        menu.findItem(R.id.comments_toggle).setTitle(R.string.comments_on);
-      }
       return super.onPrepareOptionsMenu(menu);
     }
 
@@ -260,8 +274,23 @@ public class svpismo extends Activity
             load(data.getStringExtra("location"));
 	  }
 	  break;
+        case Preferences.PREFERENCES:
+          SharedPreferences settings = getSharedPreferences(prefname, 0);
+          updateNavbar(settings.getBoolean("navbar", true));
+          boolean old_comments = comments;
+          comments = settings.getBoolean("comments", true);
+          if (old_comments != comments) {
+            reloadView();
+          }
+          break;
         default:
           super.onActivityResult(requestCode, resultCode, data);
       }
-    }    
+    }
+
+    private void updateNavbar(boolean visible) {
+      if (((LinearLayout)findViewById(R.id.navBar)).getVisibility() == View.VISIBLE != visible) {
+        ((LinearLayout)findViewById(R.id.navBar)).setVisibility(visible ? View.VISIBLE : View.GONE);
+      }
+    }
 }
