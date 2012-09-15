@@ -1,7 +1,8 @@
-CFLAGS+=-O2 -ggdb
-LDFLAGS+=-O2 -ggdb
+CFLAGS+=-O0 -ggdb -DNOANDROID
+LDFLAGS+=-O0 -ggdb -DNOANDROID
 
-all: pismo db_bin_gen
+#all: pismo db_bin_gen
+all: pismo
 
 #pismo: pismo.o parser.tab.o scanner.o common.o db_mysql.o
 #	$(CC) $(LDFLAGS) $^ -o $@ -lmysqlclient

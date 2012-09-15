@@ -10,13 +10,15 @@ void Prn(struct strbuf *q, char *fmt, ...) {
   int qj;
   va_start(ap, fmt);
   qj = vsnprintf(q->buf+q->i, 0, fmt, ap);
+  va_end(ap);
   if (q->i+qj >= q->alen-1) {
     q->alen = (q->i+qj)<<1;
     q->buf = realloc(q->buf, q->alen);
   }
+  va_start(ap, fmt);
   qj = vsnprintf(q->buf+q->i, q->alen - q->i, fmt, ap);
-  q->i += qj;
   va_end(ap);
+  q->i += qj;
 }
 
 void InitBuf(struct strbuf *q) {

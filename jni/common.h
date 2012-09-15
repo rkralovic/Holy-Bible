@@ -1,19 +1,24 @@
 #include <stdio.h>
 #include <string.h>
-#include <android/log.h>
 #include <stdlib.h>
+
+#ifndef NOANDROID
+#include <android/log.h>
+#endif
 
 extern void yyerror(const char *);
 extern int yylex();
 
 struct citania {
   int cnt;
+  char *tag;
   struct varianty *l;
   struct citania *n;
 };
 
 struct varianty {
   int cnt;
+  char *tag;
   struct casti *l;
   struct varianty *n;
 };
@@ -30,7 +35,7 @@ union node_type {
   struct citania *citania;
   struct varianty *varianty;
   struct casti *casti;
-  char id[20];
+  char* id;
   int num;
 };
 

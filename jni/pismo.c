@@ -6,12 +6,15 @@
 #include "parser.tab.h"
 #include "db.h"
 #include "db_bin.h"
+
+#ifndef NOANDROID
 #include <jni.h>
+#endif
 
 char *zalm, *aleluja;
 int kalendar;
 int html_id;
-jboolean comments;
+int comments = 0;
 
 struct strbuf kontext, out;
 
@@ -90,24 +93,40 @@ void Print(struct casti *_c) {
   // do not free k - it might be used in first/last
 }
 
-// FIXME: dealokovat
+// FIXME: dealokovat?
 void Process(struct citania *l) {
   int i;
   for (i=0; l!=NULL; i++, l=l->n) {
     struct varianty *v;
+    int first;
 
-    if (kalendar) {
-      if (i%2 && l->n) Prn(&out, "<div class=\"citanie\">Žalm</div>\n\n");
+    Prn(&out, "citanie: %s\n", l->tag);
+    if (l->tag != NULL) {
+      i = 0;
+      Prn(&out, "<div class=\"tagMajor\">%s</div>\n\n", l->tag);
+    }
+    if (l->l && kalendar) {
+      char *a = NULL;
+      for (v = l->l; v != NULL; v = v->n) {
+        if (v->l && v->tag) {
+          a = v->tag;
+          break;
+        }
+      }
+
+      if (i%2 && l->n) {
+        Prn(&out, "<div class=\"citanie\">Žalm</div>\n\n");
+        Prn(&out, "<p><span class=\"redbold\">R: </span><span class=\"it\">%s</span></p>\n\n", a ? a : zalm);
+      }
       else if (l->n) Prn(&out, "<div class=\"citanie\">%d. čítanie</div>\n\n", i/2 + 1);
       else {
-        Prn(&out, "<p><span class=\"redbold\">Aleluja: </span><span class=\"it\">%s</span></p>\n\n", aleluja);
+        Prn(&out, "<p><span class=\"redbold\">Aleluja: </span><span class=\"it\">%s</span></p>\n\n", a ? a : aleluja);
         Prn(&out, "<div class=\"citanie\">Evanjelium</div>\n\n");
       }
 
-      if (i==1 && l->n)  Prn(&out, "<p><span class=\"redbold\">R: </span><span class=\"it\">%s</span></p>\n\n", zalm);
     }
 
-    for (v=l->l; v!=NULL; v=v->n) {
+    for (first = 1, v = l->l; v != NULL; v = v->n) {
 /*
       struct casti *c;
       char K[MAXLEN];
@@ -125,9 +144,14 @@ void Process(struct citania *l) {
       Prn(&out, "</div>\n\n");
 */
 
-      Print(v->l);
-
-      if (v->n) Prn(&out, "<div class=\"varianta\">Alebo:</div>\n\n");
+      if (v->l) {
+        Prn(&out, "varianta: %s\n", v->tag);
+        if (!first) Prn(&out, "<div class=\"varianta\">Alebo:</div>\n\n");
+        Print(v->l);
+        first = 0;
+      } else if (v->tag) {
+        Prn(&out, "<div class=\"tagMinor\">%s</div>\n\n", v->tag);
+      }
     }
   }
 }
@@ -231,37 +255,30 @@ void ShortTOC() {
   }
 }
 
-jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring, jboolean _comments) {
+void CommonMain(const char* qstr, const char* css, int css_len) {
   int d,m,y;
   char query[1024];
-  const char *qstr;
   char *coord=NULL;
   char *search=NULL;
   char *obsah=NULL;
   char buf[1024];
   char *tmp;
-  jstring jout;
-  const char *css;
 
   time_t t;
   struct tm *tt;
 
   aleluja = zalm = NULL;
-  comments = _comments;
-  db_len = _dblen;
-  db = (*env)->GetDirectBufferAddress(env,_db);
-  css = (*env)->GetDirectBufferAddress(env,_css);
-  if (db==NULL) return (*env)->NewStringUTF(env, "");
 
+  /*
   time(&t);
   tt = localtime(&t);
-  d = -1;
-  m = -1;
-  y = -1;
+  d = tt->tm_mday;
+  m = tt->tm_mon+1;
+  y = tt->tm_year+1900;
+  */
+  d = m = y = -1;
   html_id=0;
 
-  qstr = (*env)->GetStringUTFChars(env, querystring, NULL);
-  __android_log_print(ANDROID_LOG_INFO, "svpismo", "qstr = %s\n", qstr);
   if (qstr) {
     char *s;
     s = strstr(qstr, "d="); if (s) sscanf(s, "d=%d", &d);
@@ -301,10 +318,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
       sscanf(s+8, "%1000[^&]", query);
       aleluja = StringDecode(query);
     }
-    (*env)->ReleaseStringUTFChars(env,  querystring, qstr);
   }
-
-  if (db_init()<0) return (*env)->NewStringUTF(env, "");
 
   InitBuf(&out); Rst(&out);
   Prn(&out, "<html><head>\n"
@@ -313,11 +327,13 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
 //      "<meta name=\"viewport\" content=\"width=100%; initial-scale=1; maximum-scale=1; minimum-scale=1; user-scalable=no;\" />"
       );
 
+#ifdef NOANDROID
+  Prn(&out, "<link rel=\"stylesheet\" href=\"breviar.css\">\n");
+#else
   Prn(&out, "<style type=\"text/css\">\n<!--\n");
   Cpy(&out, css, css_len);
-
-
   Prn(&out, "\n--></style>");
+#endif
 
   Prn(&out, "<script type=\"text/javascript\">\n"
       "function submitsearch() {\n"
@@ -469,15 +485,43 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
     
   Prn(&out, "</body></html>\n");
 
+  FreeBuf(&kontext);
+  db_close();
+}
+
+#ifdef NOANDROID
+int main() {
+  const char *qstr;
+  qstr = getenv("QUERY_STRING");
+  if (db_init() < 0) return 1;
+  printf("Content-Type: text/html; charset=UTF-8\n\n");
+  CommonMain(qstr, 0, 0);
+  printf("%s", out.buf);
+  FreeBuf(&out);
+  return 0;
+}
+#else
+jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring, jboolean _comments) {
+  jstring jout;
+  const char *qstr;
+
+  db_len = _dblen;
+  db = (*env)->GetDirectBufferAddress(env,_db);
+  if (db==NULL) return (*env)->NewStringUTF(env, "");
+  comments = _comments;
+  qstr = (*env)->GetStringUTFChars(env, querystring, NULL);
+  __android_log_print(ANDROID_LOG_INFO, "svpismo", "qstr = %s\n", qstr);
+    
+  if (db_init() < 0) return (*env)->NewStringUTF(env, "");
+
+  CommonMain(qstr, (*env)->GetDirectBufferAddress(env,_css), css_len);
+
+  if (qstr) (*env)->ReleaseStringUTFChars(env,  querystring, qstr);
   {
     char *tmp = StringEncode(out.buf);
     jout = (*env)->NewStringUTF(env, tmp);
     free(tmp);
   }
-
-  FreeBuf(&kontext);
   FreeBuf(&out);
-
-  db_close();
-  return jout;
 }
+#endif
