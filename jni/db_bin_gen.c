@@ -193,6 +193,7 @@ int main() {
   }
   mysql_free_result(result);
 
+  /*
   mysql_query(conn, "select datum, zalm, citania from liturgicke_citania order by datum asc");
   result = mysql_store_result(conn);
   HDR->n_kalendar = mysql_num_rows(result);
@@ -206,6 +207,7 @@ int main() {
     i++;
   }
   mysql_free_result(result);
+  */
 
   for (i=0; i<TABLES; i++) {
     int j;

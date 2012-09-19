@@ -56,6 +56,7 @@ void init_search(char *b) {
   book = (char *)malloc(strlen(b)+1);
   strcpy(book, b);
   result = NULL;
+  InitBuf(&q1); InitBuf(&q2);
   Rst(&q1); Rst(&q2);
   Prn(&q1, "(select 1 as typ, id, html from doc__biblia_text o where false");
   Prn(&q2, ") union (select 2 as typ, end as id, html from doc__biblia_ppc o where false");
@@ -63,6 +64,7 @@ void init_search(char *b) {
 
 void free_search() {
   free(book);
+  FreeBuf(&q1); FreeBuf(&q2);
   if (result) mysql_free_result(result);
 }
 
@@ -121,7 +123,7 @@ void get_prev(char *b, int h, char **ob, int *oh) {
   MYSQL_RES *result;
   MYSQL_ROW row;
 
-  snprintf(buf, sizeof(buf), "select _spis, _1 from doc__biblia_text where id < (select min(id) from doc__biblia_text where _spis='%s' and _1=%d) order by id desc limit 1", b, h); 
+  snprintf(buf, sizeof(buf), "select _spis, _1 from doc__biblia_text where id < (select min(id) from doc__biblia_text where _spis='%s' and _1=%d) and _1 is not null order by id desc limit 1", b, h); 
   mysql_query(conn, buf);
   result = mysql_store_result(conn);
   if ((row = mysql_fetch_row(result))) {
@@ -136,7 +138,7 @@ void get_next(char *b, int h, char **ob, int *oh) {
   MYSQL_RES *result;
   MYSQL_ROW row;
 
-  snprintf(buf, sizeof(buf), "select _spis, _1 from doc__biblia_text where id > (select max(id) from doc__biblia_text where _spis='%s' and _1=%d) order by id asc limit 1", b, h); 
+  snprintf(buf, sizeof(buf), "select _spis, _1 from doc__biblia_text where id > (select max(id) from doc__biblia_text where _spis='%s' and _1=%d) and _1 is not null order by id asc limit 1", b, h); 
   mysql_query(conn, buf);
   result = mysql_store_result(conn);
   if ((row = mysql_fetch_row(result))) {
@@ -144,6 +146,12 @@ void get_next(char *b, int h, char **ob, int *oh) {
     sscanf(row[1], "%d", oh);
   } else *ob = NULL;
   mysql_free_result(result);
+}
+
+void get_first(char **ob, int *oh) {
+  // not very nice to hardcode this, but it should be quite stable :-)
+  *oh = 1;
+  *ob = strdup("Gn");
 }
 
 void fulltext_search(char *s) {
