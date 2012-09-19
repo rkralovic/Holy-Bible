@@ -528,9 +528,11 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   if (qstr) (*env)->ReleaseStringUTFChars(env,  querystring, qstr);
   {
     char *tmp = StringEncode(out.buf);
+//    __android_log_print(ANDROID_LOG_INFO, "svpismo", "reply = %s\n", tmp);
     jout = (*env)->NewStringUTF(env, tmp);
     free(tmp);
   }
   FreeBuf(&out);
+  return jout;
 }
 #endif
