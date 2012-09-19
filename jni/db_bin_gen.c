@@ -75,7 +75,7 @@ int main() {
   HDR->signature = SIGNATURE;
 
   mysql_query(conn, "select o.id, o.spis, coalesce(o.alias,''), max(coalesce(t._1,0)), min(coalesce(t.id,1000000))-1, max(coalesce(t.id,-1))-1 "
-      "from doc_biblia_obsah o left outer join doc_biblia_text t on o.id=t._0 "
+      "from doc__biblia_obsah o left outer join doc__biblia_text t on o.id=t._0 "
       "group by o.id, o.spis, coalesce(o.alias,'') "
       "order by o.id asc");
   result = mysql_store_result(conn);
@@ -103,7 +103,7 @@ int main() {
 #define HLV ((struct hlava *)(buf+KNH[i].hlava))
 
       sprintf(query, "select min(coalesce(t.id,1000000))-1, max(coalesce(t.id,-1))-1 "
-          "from doc_biblia_text t "
+          "from doc__biblia_text t "
           "where t._0=%d and t._1=%d", i+1, j+1);
       mysql_query(conn, query);
       result2 = mysql_store_result(conn);
@@ -114,7 +114,7 @@ int main() {
       mysql_free_result(result2);
 
       sprintf(query, "select t._2, min(t.id)-1, max(t.id)-1 "
-          "from doc_biblia_text t "
+          "from doc__biblia_text t "
           "where t._0=%d and t._1=%d and t._2 is not null group by t._2", i+1, j+1);
       mysql_query(conn, query);
       result2 = mysql_store_result(conn);
@@ -140,13 +140,13 @@ int main() {
   }
   mysql_free_result(result);
 
-  mysql_query(conn, "select max(coalesce(id,0)) from doc_biblia_text where _0 is not null order by id asc");
+  mysql_query(conn, "select max(coalesce(id,0)) from doc__biblia_text where _0 is not null order by id asc");
   result = mysql_store_result(conn);
   row = mysql_fetch_row(result);
   sscanf(row[0], "%d", &HDR->n_text);
   mysql_free_result(result);
 
-  mysql_query(conn, "select id, _0-1, coalesce(_1, 0)-1, coalesce(_2, 0)-1, coalesce(html,'') from doc_biblia_text where _0 is not null order by id asc");
+  mysql_query(conn, "select id, _0-1, coalesce(_1, 0)-1, coalesce(_2, 0)-1, coalesce(html,'') from doc__biblia_text where _0 is not null order by id asc");
   result = mysql_store_result(conn);
   i=0;
   ASGN(HDR->text, buf_alloc(sizeof(struct text)*HDR->n_text));
@@ -169,13 +169,13 @@ int main() {
   }
   mysql_free_result(result);
 
-  mysql_query(conn, "select max(coalesce(id,0)) from doc_biblia_ppc order by id asc");
+  mysql_query(conn, "select max(coalesce(id,0)) from doc__biblia_ppc order by id asc");
   result = mysql_store_result(conn);
   row = mysql_fetch_row(result);
   sscanf(row[0], "%d", &HDR->n_ppc);
   mysql_free_result(result);
 
-  mysql_query(conn, "select id, coalesce(html,'') from doc_biblia_ppc order by id asc");
+  mysql_query(conn, "select id, coalesce(html,'') from doc__biblia_ppc order by id asc");
   result = mysql_store_result(conn);
   i=0;
   ASGN(HDR->ppc, buf_alloc(sizeof(int32_t)*HDR->n_ppc));
@@ -193,6 +193,7 @@ int main() {
   }
   mysql_free_result(result);
 
+  /*
   mysql_query(conn, "select datum, zalm, citania from liturgicke_citania order by datum asc");
   result = mysql_store_result(conn);
   HDR->n_kalendar = mysql_num_rows(result);
@@ -206,14 +207,15 @@ int main() {
     i++;
   }
   mysql_free_result(result);
+  */
 
   for (i=0; i<TABLES; i++) {
     int j;
     int min = (1<<i);
     int max = (i==TABLES-1) ? (1<<30) : (1<<(i+1))-1;
-    sprintf(query, "(select 0, id-1, start-1 as start, end-1 from doc_biblia_text "
+    sprintf(query, "(select 0, id-1, start-1 as start, end-1 from doc__biblia_text "
         "where end-start+1>=%d and end-start+1<=%d) union "
-        "(select 1, id-1, start-1, end-1 from doc_biblia_ppc "
+        "(select 1, id-1, start-1, end-1 from doc__biblia_ppc "
         "where end-start+1>=%d and end-start+1<=%d) order by start asc", min, max, min, max);
     mysql_query(conn, query);
     result = mysql_store_result(conn);

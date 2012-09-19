@@ -41,7 +41,7 @@ char *check_book(char *s) {
   se = (char *)malloc(strlen(s)*3+1);
   mysql_real_escape_string(conn, se, s, strlen(s));
   if (strlen(se)>sizeof(buf)/2) return NULL;
-  snprintf(buf, sizeof(buf), "select spis from doc_biblia_obsah where spis='%s' or coalesce(alias,spis)='%s' limit 1", se, se); 
+  snprintf(buf, sizeof(buf), "select spis from doc__biblia_obsah where spis='%s' or coalesce(alias,spis)='%s' limit 1", se, se); 
   free(se);
   mysql_query(conn, buf);
   result = mysql_store_result(conn);
@@ -56,13 +56,15 @@ void init_search(char *b) {
   book = (char *)malloc(strlen(b)+1);
   strcpy(book, b);
   result = NULL;
+  InitBuf(&q1); InitBuf(&q2);
   Rst(&q1); Rst(&q2);
-  Prn(&q1, "(select 1 as typ, id, html from doc_biblia_text o where false");
-  Prn(&q2, ") union (select 2 as typ, end as id, html from doc_biblia_ppc o where false");
+  Prn(&q1, "(select 1 as typ, id, html from doc__biblia_text o where false");
+  Prn(&q2, ") union (select 2 as typ, end as id, html from doc__biblia_ppc o where false");
 }
 
 void free_search() {
   free(book);
+  FreeBuf(&q1); FreeBuf(&q2);
   if (result) mysql_free_result(result);
 }
 
@@ -70,15 +72,15 @@ void add_search(int hb, int vb, int he, int ve) {
   if (ve==-1 || vb==-1) {
     Prn(&q1, " or ( o._spis='%s' and o._1>=%d and o._1<=%d ) ",
            book, hb, he);
-    Prn(&q2, " or ( o.end>=(select min(id) from doc_biblia_text t where _spis='%s' and _1>=%d and _1<=%d) and "
-           "      o.start<=(select max(id) from doc_biblia_text t where _spis='%s' and _1>=%d and _1<=%d) )",
+    Prn(&q2, " or ( o.end>=(select min(id) from doc__biblia_text t where _spis='%s' and _1>=%d and _1<=%d) and "
+           "      o.start<=(select max(id) from doc__biblia_text t where _spis='%s' and _1>=%d and _1<=%d) )",
            book, hb, he, book, hb, he);
   } else {
-    Prn(&q1, " or ( o.end>=(select min(id) from doc_biblia_text t where _spis='%s' and _1=%d and _2=%d) and "
-         "      o.start<=(select max(id) from doc_biblia_text t where _spis='%s' and _1=%d and _2=%d) )", 
+    Prn(&q1, " or ( o.end>=(select min(id) from doc__biblia_text t where _spis='%s' and _1=%d and _2=%d) and "
+         "      o.start<=(select max(id) from doc__biblia_text t where _spis='%s' and _1=%d and _2=%d) )", 
          book, hb, vb, book, he, ve);
-    Prn(&q2, " or ( o.end>=(select min(id) from doc_biblia_text t where _spis='%s' and _1=%d and _2=%d) and "
-         "      o.start<=(select max(id) from doc_biblia_text t where _spis='%s' and _1=%d and _2=%d) )", 
+    Prn(&q2, " or ( o.end>=(select min(id) from doc__biblia_text t where _spis='%s' and _1=%d and _2=%d) and "
+         "      o.start<=(select max(id) from doc__biblia_text t where _spis='%s' and _1=%d and _2=%d) )", 
          book, hb, vb, book, he, ve);
   }
 }
@@ -121,7 +123,7 @@ void get_prev(char *b, int h, char **ob, int *oh) {
   MYSQL_RES *result;
   MYSQL_ROW row;
 
-  snprintf(buf, sizeof(buf), "select _spis, _1 from doc_biblia_text where id < (select min(id) from doc_biblia_text where _spis='%s' and _1=%d) order by id desc limit 1", b, h); 
+  snprintf(buf, sizeof(buf), "select _spis, _1 from doc__biblia_text where id < (select min(id) from doc__biblia_text where _spis='%s' and _1=%d) and _1 is not null order by id desc limit 1", b, h); 
   mysql_query(conn, buf);
   result = mysql_store_result(conn);
   if ((row = mysql_fetch_row(result))) {
@@ -136,7 +138,7 @@ void get_next(char *b, int h, char **ob, int *oh) {
   MYSQL_RES *result;
   MYSQL_ROW row;
 
-  snprintf(buf, sizeof(buf), "select _spis, _1 from doc_biblia_text where id > (select max(id) from doc_biblia_text where _spis='%s' and _1=%d) order by id asc limit 1", b, h); 
+  snprintf(buf, sizeof(buf), "select _spis, _1 from doc__biblia_text where id > (select max(id) from doc__biblia_text where _spis='%s' and _1=%d) and _1 is not null order by id asc limit 1", b, h); 
   mysql_query(conn, buf);
   result = mysql_store_result(conn);
   if ((row = mysql_fetch_row(result))) {
@@ -146,11 +148,17 @@ void get_next(char *b, int h, char **ob, int *oh) {
   mysql_free_result(result);
 }
 
+void get_first(char **ob, int *oh) {
+  // not very nice to hardcode this, but it should be quite stable :-)
+  *oh = 1;
+  *ob = strdup("Gn");
+}
+
 void fulltext_search(char *s) {
   char *q;
   q = (char *)malloc(3*strlen(s)+1024);
   sprintf(q, "%s%s order by id, typ", q1.buf, q2.buf);
-  sprintf(q, "select _spis, _1, coalesce(_2,''), html from doc_biblia_text where html like '%%");
+  sprintf(q, "select _spis, _1, coalesce(_2,''), html from doc__biblia_text where html like '%%");
   mysql_real_escape_string(conn, q+strlen(q), s, strlen(s));
   sprintf(q+strlen(q), "%%'");
   mysql_query(conn, q);

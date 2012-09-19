@@ -14,7 +14,7 @@
 char *zalm, *aleluja;
 int kalendar;
 int html_id;
-int comments = 0;
+int comments = 1;
 
 struct strbuf kontext, out;
 
@@ -100,7 +100,7 @@ void Process(struct citania *l) {
     struct varianty *v;
     int first;
 
-    Prn(&out, "citanie: %s\n", l->tag);
+//    Prn(&out, "citanie: %s\n", l->tag);
     if (l->tag != NULL) {
       i = 0;
       Prn(&out, "<div class=\"tagMajor\">%s</div>\n\n", l->tag);
@@ -145,7 +145,7 @@ void Process(struct citania *l) {
 */
 
       if (v->l) {
-        Prn(&out, "varianta: %s\n", v->tag);
+//        Prn(&out, "varianta: %s\n", v->tag);
         if (!first) Prn(&out, "<div class=\"varianta\">Alebo:</div>\n\n");
         Print(v->l);
         first = 0;
@@ -336,12 +336,21 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
 #endif
 
   Prn(&out, "<script type=\"text/javascript\">\n"
+#ifdef NOANDROID
+      "function submitsearch() {\n"
+      "  this.document.location.href = \"pismo.cgi?search=\"+document.getElementById('searchstring').value ;\n"
+      "}\n"
+      "function submitcoord() {\n"
+      "  this.document.location.href = \"pismo.cgi?c=\"+document.getElementById('zobraz').value ;\n"
+      "}\n"
+#else
       "function submitsearch() {\n"
       "  bridge.loadit(\"pismo.cgi?search=\"+document.getElementById('searchstring').value );\n"
       "}\n"
       "function submitcoord() {\n"
       "  bridge.loadit(\"pismo.cgi?c=\"+document.getElementById('zobraz').value );\n"
       "}\n"
+#endif
       "function ToggleClass(eid) {\n"
       "  if (document.getElementById(eid).className == \"komentar\") {\n"
       "    document.getElementById(eid).className = \"skrytykomentar\";\n"

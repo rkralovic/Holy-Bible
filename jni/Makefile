@@ -1,11 +1,10 @@
 CFLAGS+=-O0 -ggdb -DNOANDROID
 LDFLAGS+=-O0 -ggdb -DNOANDROID
 
-#all: pismo db_bin_gen
-all: pismo
+all: pismo pismo.cgi db_bin_gen
 
-#pismo: pismo.o parser.tab.o scanner.o common.o db_mysql.o
-#	$(CC) $(LDFLAGS) $^ -o $@ -lmysqlclient
+pismo.cgi: pismo.o parser.tab.o scanner.o common.o db_mysql.o
+	$(CC) $(LDFLAGS) $^ -o $@ -lmysqlclient
 
 pismo: pismo.o parser.tab.o scanner.o common.o db_bin.o
 	$(CC) $(LDFLAGS) $^ -o $@
@@ -27,5 +26,5 @@ parser.tab.h: parser.y
 	bison -v -d $<
 
 clean:
-	rm -f parser.tab.* scanner.c parser *.o parser.output pismo db_bin_gen
+	rm -f parser.tab.* scanner.c parser *.o parser.output pismo db_bin_gen pismo.cgi
 
