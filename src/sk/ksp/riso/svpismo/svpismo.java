@@ -26,14 +26,14 @@ public class svpismo extends Activity
 {
     static final String TAG = "svpismo";
     static final String prefname = "SvPismoPrefs";
-    MappedByteBuffer db, css;
-    long db_len, css_len;
+    MappedByteBuffer db, css, css_inv;
+    long db_len, css_len, css_inv_len;
     int scale;
     float scroll_to = -1;
 
     public WebView wv;
     boolean wv_initialized = false;
-    boolean comments;
+    boolean comments, nightmode;
     String active_url;
     final String toc_url = "pismo.php?obsah=long";
 
@@ -42,8 +42,14 @@ public class svpismo extends Activity
         scale = (int)(wv.getScale()*100);
 //        Log.v("svpismo", "load: getScale " + scale);
       }
-      String cnt = "data:text/html;charset=UTF-8," +
-                   process(db, db_len, css, css_len, url, comments);
+      String cnt;
+      if (nightmode) {
+        cnt = "data:text/html;charset=UTF-8," +
+               process(db, db_len, css_inv, css_inv_len, url, comments);
+      } else {
+        cnt = "data:text/html;charset=UTF-8," +
+              process(db, db_len, css, css_len, url, comments);
+      }
       wv.loadUrl(cnt);
       wv.setInitialScale(scale);
       wv_initialized = true;
@@ -72,6 +78,7 @@ public class svpismo extends Activity
         SharedPreferences settings = getSharedPreferences(prefname, 0);
         scale = settings.getInt("scale", 100);
         comments = settings.getBoolean("comments", true);
+        nightmode = settings.getBoolean("nightmode", false);
 //        Log.v("svpismo", "init with scale " + scale);
 
         wv = (WebView)findViewById(R.id.wv);
@@ -116,6 +123,13 @@ public class svpismo extends Activity
             FileChannel channel = dbf.createInputStream().getChannel();
             css = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
             css_len = dbf.getLength();
+          }
+
+          {
+            AssetFileDescriptor dbf = getAssets().openFd("breviar-invert.css");
+            FileChannel channel = dbf.createInputStream().getChannel();
+            css_inv = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
+            css_inv_len = dbf.getLength();
           }
 
           Intent I = getIntent();
@@ -180,6 +194,7 @@ public class svpismo extends Activity
       SharedPreferences.Editor editor = settings.edit();
       editor.putInt("scale", scale);
       editor.putBoolean("comments", comments);
+      editor.putBoolean("nightmode", nightmode);
       editor.commit();
     }
 
@@ -208,6 +223,11 @@ public class svpismo extends Activity
           return true;
         case R.id.comments_toggle:
           comments = !comments;
+          syncPreferences();
+          load(active_url);
+          return true;
+        case R.id.nightmode_toggle:
+          nightmode = !nightmode;
           syncPreferences();
           load(active_url);
           return true;
@@ -247,6 +267,11 @@ public class svpismo extends Activity
         menu.findItem(R.id.comments_toggle).setTitle(R.string.comments_off);
       } else {
         menu.findItem(R.id.comments_toggle).setTitle(R.string.comments_on);
+      }
+      if (nightmode) {
+        menu.findItem(R.id.nightmode_toggle).setTitle(R.string.nightmode_off);
+      } else {
+        menu.findItem(R.id.nightmode_toggle).setTitle(R.string.nightmode_on);
       }
       return super.onPrepareOptionsMenu(menu);
     }
