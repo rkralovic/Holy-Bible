@@ -491,6 +491,8 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   Prn(&out, "<p>\n"
       "<input type=\"text\" id=\"searchstring\">\n"
       "<button onClick=\"submitsearch()\">Hľadaj</button>\n");
+  Prn(&out, "<p>\n"
+      "<a href=\"pismo.cgi?obsah=long\">Obsah</a>\n");
     
   Prn(&out, "</body></html>\n");
 
