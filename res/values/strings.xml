@@ -9,6 +9,8 @@
     <string name="comments_off">Skryť komentáre</string>
     <string name="nightmode_on">Nočný režim</string>
     <string name="nightmode_off">Denný režim</string>
+    <string name="fullscreen_on">Celá obrazovka</string>
+    <string name="fullscreen_off">Zobraz navigáciu</string>
     <string name="new_bookmark">Pridať záložku</string>
     <string name="edit_bookmark">Upraviť záložku</string>
     <string name="modify_bookmark_text">Upraviť</string>

@@ -12,6 +12,10 @@
         android:title="Nočný režim">
     </item>
 
+    <item android:id="@+id/fullscreen_toggle"
+        android:title="Celá obrazovka">
+    </item>
+
     <item android:id="@+id/bookmarks"
         android:title="Záložky">
     </item>

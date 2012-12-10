@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 
 import sk.ksp.riso.svpismo.JSInterface;
 import sk.ksp.riso.svpismo.Bookmarks;
@@ -33,7 +34,7 @@ public class svpismo extends Activity
 
     public WebView wv;
     boolean wv_initialized = false;
-    boolean comments, nightmode;
+    boolean comments, nightmode, fullscreen;
     String active_url;
     final String toc_url = "pismo.php?obsah=long";
 
@@ -79,6 +80,7 @@ public class svpismo extends Activity
         scale = settings.getInt("scale", 100);
         comments = settings.getBoolean("comments", true);
         nightmode = settings.getBoolean("nightmode", false);
+        fullscreen = settings.getBoolean("fullscreen", false);
 //        Log.v("svpismo", "init with scale " + scale);
 
         wv = (WebView)findViewById(R.id.wv);
@@ -176,6 +178,7 @@ public class svpismo extends Activity
 
           });
 
+          updateFullscreen();
         } catch (IOException e) {
           wv.loadData("Some problem.", "text/html", "utf-8");
         }
@@ -195,6 +198,7 @@ public class svpismo extends Activity
       editor.putInt("scale", scale);
       editor.putBoolean("comments", comments);
       editor.putBoolean("nightmode", nightmode);
+      editor.putBoolean("fullscreen", fullscreen);
       editor.commit();
     }
 
@@ -231,6 +235,11 @@ public class svpismo extends Activity
           syncPreferences();
           load(active_url);
           return true;
+        case R.id.fullscreen_toggle:
+          fullscreen = !fullscreen;
+          updateFullscreen();
+          syncPreferences();
+          return true;
         case R.id.bookmarks:
 	  Intent i = new Intent(this, Bookmarks.class);
 	  i.putExtra("location", active_url); 
@@ -248,7 +257,26 @@ public class svpismo extends Activity
         wv.goBack();
         return true;
       }
+      if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+        wv.pageUp(false);
+        return true;
+      }
+      if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+        wv.pageDown(false);
+        return true;
+      }
       return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+      if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+        return true;
+      }
+      if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+        return true;
+      }
+      return super.onKeyUp(keyCode, event);
     }
 
     public native String process(ByteBuffer db, long db_len, ByteBuffer css,
@@ -273,6 +301,11 @@ public class svpismo extends Activity
       } else {
         menu.findItem(R.id.nightmode_toggle).setTitle(R.string.nightmode_on);
       }
+      if (fullscreen) {
+        menu.findItem(R.id.fullscreen_toggle).setTitle(R.string.fullscreen_off);
+      } else {
+        menu.findItem(R.id.fullscreen_toggle).setTitle(R.string.fullscreen_on);
+      }
       return super.onPrepareOptionsMenu(menu);
     }
 
@@ -289,4 +322,16 @@ public class svpismo extends Activity
           super.onActivityResult(requestCode, resultCode, data);
       }
     }    
+
+    void updateFullscreen() {
+      WindowManager.LayoutParams params = getWindow().getAttributes();
+      if (fullscreen) {
+        findViewById(R.id.navbar).setVisibility(View.GONE);
+        params.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+      } else {
+        findViewById(R.id.navbar).setVisibility(View.VISIBLE);
+        params.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
+      }
+      getWindow().setAttributes(params);
+    }
 }
