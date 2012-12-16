@@ -35,7 +35,7 @@ public class svpismo extends Activity
     public WebView wv;
     boolean wv_initialized = false;
     boolean comments, nightmode, fullscreen;
-    String active_url;
+    String active_url = "";
     final String toc_url = "pismo.php?obsah=long";
 
     public void load(String url) {

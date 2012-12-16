@@ -48,6 +48,7 @@ public class Bookmarks extends Activity
 
     String getSuggestedLabel() {
       String query = getIntent().getStringExtra("location");
+      if (query == null) return "";
       if (Pattern.matches(".*[?&]d=.*", query) &&
           Pattern.matches(".*[?&]m=.*", query) &&
           Pattern.matches(".*[?&]y=.*", query)) {
