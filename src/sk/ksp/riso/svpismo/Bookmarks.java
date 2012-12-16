@@ -260,6 +260,7 @@ public class Bookmarks extends Activity
 
     @Override
     public void onDestroy() {
+      if (A != null) A.changeCursor(null);
       db.close();
       super.onDestroy();
     }
