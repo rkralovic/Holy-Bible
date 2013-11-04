@@ -17,13 +17,15 @@
                     resourcefilter="${aapt.resource.filter}"
                     libraryResFolderPathRefid="project.library.res.folder.path"
                     libraryPackagesRefid="project.library.packages"
+                    libraryRFileRefid="project.library.bin.r.file.path"
                     previousBuildType="${build.last.target}"
                     buildType="${build.target}"
                     ignoreAssets="${aapt.ignore.assets}">
                 <res path="${out.res.absolute.dir}" />
                 <res path="${resource.absolute.dir}" />
                 <nocompress /> <!-- forces no compression on any files in assets or res/raw -->
-                <!-- <nocompress extension="xml" /> forces no compression on specific file extensions in assets and res/raw -->
+                <!-- <nocompress extension="xml" /> forces no compression on specific file extensio
+ns in assets and res/raw -->
             </aapt>
         </do-only-if-not-library>
     </target>
