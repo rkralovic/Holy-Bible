@@ -135,11 +135,12 @@ public class svpismo extends Activity
           }
 
           Intent I = getIntent();
-          if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
-            load("pismo.cgi?" + I.getData().getQuery());
-          } else {
-            if (wv.restoreState(savedInstanceState) == null)
+          if (wv.restoreState(savedInstanceState) == null) {
+            if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
+              load("pismo.cgi?" + I.getData().getQuery());
+            } else {
               load("pismo.cgi");
+            }
           }
 
           wv.getSettings().setJavaScriptEnabled(true);
