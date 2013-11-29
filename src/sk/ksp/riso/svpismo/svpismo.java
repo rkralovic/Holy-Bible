@@ -1,6 +1,7 @@
 package sk.ksp.riso.svpismo;
 
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -148,6 +149,7 @@ public class svpismo extends Activity
 
           wv.setWebViewClient( new WebViewClient() {
             svpismo parent;
+            boolean scaleChangedRunning = false;
             { parent = myself; }
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
               parent.load(url);
@@ -157,7 +159,20 @@ public class svpismo extends Activity
             @Override
             public void onScaleChanged(WebView view, float oldSc, float newSc) {
               parent.scale = (int)(newSc*100);
-              view.setInitialScale(parent.scale);
+              if (Build.VERSION.SDK_INT < 19) {  // pre-KitKat
+                view.setInitialScale(parent.scale);
+              } else {
+                if (scaleChangedRunning) return;
+                scaleChangedRunning = true;
+                final WebView final_view = view;
+                view.postDelayed(new Runnable() {
+                  @Override
+                  public void run() {
+                    final_view.evaluateJavascript("document.getElementById('contentRoot').style.width = window.innerWidth;", null);
+                    scaleChangedRunning = false;
+                  }
+                }, 100);
+              }
 //              Log.v("svpismo", "onScaleChanged " + parent.scale);
             }
 

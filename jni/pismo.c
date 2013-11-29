@@ -371,7 +371,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
 
   if (coord && d==-1) {
     Prn(&out, "<title>%s</title>\n"
-      "</head><body>\n"
+      "</head><body><div id=\"contentRoot\">\n"
       "<div class=\"nadpis\">%s</div>\n\n", coord, coord);
     kalendar = 0;
     scan_string(coord);
@@ -418,7 +418,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     int h,v,cnt;
 
     Prn(&out, "<title>Vyhľadávanie \"%s\"</title>\n"
-        "</head><body>\n"
+        "</head><body><div id=\"contentRoot\">\n"
         "<div class=\"nadpis\">Vyhľadávanie \"%s\"</div>\n\n",
         search, search);
 
@@ -452,7 +452,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     //  Prn(&out, "%s %s %s %s\n", row[0], row[1], row[2], row[3]);
 
     Prn(&out, "<title>Čítania na %d.%d.%d</title>\n"
-        "</head><body>\n"
+        "</head><body><div id=\"contentRoot\">\n"
         "<div class=\"nadpis\">Liturgické čítania na %d.%d.%d</div>\n\n",
         d,m,y,d,m,y);
     scan_string(coord);
@@ -470,12 +470,12 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
 
   } else if (obsah) {
     Prn(&out, "<title>Obsah</title>\n"
-        "</head><body>\n"
+        "</head><body><div id=\"contentRoot\">\n"
         "<div class=\"nadpis\">Obsah</div>\n\n");
     TOC();
   } else {
     Prn(&out, "<title>Obsah</title>\n"
-        "</head><body>\n"
+        "</head><body><div id=\"contentRoot\">\n"
         "<div class=\"nadpis\">Sväté Písmo</div>\n\n");
     ShortTOC();
   }
@@ -494,7 +494,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   Prn(&out, "<p>\n"
       "<a href=\"pismo.cgi?obsah=long\">Obsah</a>\n");
     
-  Prn(&out, "</body></html>\n");
+  Prn(&out, "</div></body></html>\n");
 
   FreeBuf(&kontext);
   db_close();
