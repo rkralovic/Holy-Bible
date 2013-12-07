@@ -244,10 +244,9 @@ int main() {
 #define UVD ((struct uvod *)(buf+HDR->uvod))
   i=0;
   while ((row = mysql_fetch_row(result))) {
-    int j;
-
     ASGN(UVD[i].kniha, buf_add(row[1], strlen(row[1])+1));
     ASGN(UVD[i].text, buf_add(row[2], strlen(row[2])+1));
+    i++;
   }
   mysql_free_result(result);
 
