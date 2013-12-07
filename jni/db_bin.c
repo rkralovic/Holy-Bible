@@ -389,7 +389,7 @@ int get_uvod_pre_knihu(const char* b) {
   b_name = STR(((struct kniha *)(base+hdr->knihy))[b_id].meno);
 
   for (i = 0; i < hdr->n_uvod; ++i) {
-    if (!strcmp(b_name, STR(((struct uvod *)(base + hdr->uvod))[i].kniha))) return i;
+    if (!cmp(b_name, STR(((struct uvod *)(base + hdr->uvod))[i].kniha))) return i;
   }
   return -1;
 }

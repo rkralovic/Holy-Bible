@@ -240,12 +240,12 @@ void TOC() {
   char *b1, *b2, *q;
   int h1, h2, h2prev;
   get_first(&b1, &h1);
-  int uvod_prev = 0;
+  int uvod_prev = -1;
   while (b1 != NULL) {
     h2prev = h1;
     int uvod = get_uvod_pre_knihu(b1);
     if (uvod != -1) {
-      for (; uvod_prev < uvod; uvod_prev++) {
+      for (uvod_prev++; uvod_prev < uvod; uvod_prev++) {
         Prn(&out, "<p><a href=\"pismo.cgi?uvod=%d\">%s</a>", uvod_prev, get_uvod_kniha(uvod_prev));
       }
     }
