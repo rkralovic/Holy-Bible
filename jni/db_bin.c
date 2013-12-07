@@ -369,13 +369,13 @@ int get_fulltext_result(char **b, int *hl, int *v, char **txt) {
 
 const char* get_uvod(int id) {
   if (id < 0) return "";
-  if (id >= hdr->n_uvod) return "";
+  if (id >= hdr->n_uvod) id = 0;
   return STR(((struct uvod *)(base + hdr->uvod))[id].text);
 }
 
 const char* get_uvod_kniha(int id) {
   if (id < 0) return "";
-  if (id >= hdr->n_uvod) return "";
+  if (id >= hdr->n_uvod) id = 0;
   return STR(((struct uvod *)(base + hdr->uvod))[id].kniha);
 }
 

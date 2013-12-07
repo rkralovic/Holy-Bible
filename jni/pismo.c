@@ -240,11 +240,23 @@ void TOC() {
   char *b1, *b2, *q;
   int h1, h2, h2prev;
   get_first(&b1, &h1);
+  int uvod_prev = 0;
   while (b1 != NULL) {
     h2prev = h1;
+    int uvod = get_uvod_pre_knihu(b1);
+    if (uvod != -1) {
+      for (; uvod_prev < uvod; uvod_prev++) {
+        Prn(&out, "<p><a href=\"pismo.cgi?uvod=%d\">%s</a>", uvod_prev, get_uvod_kniha(uvod_prev));
+      }
+    }
     int single_chapter = IsSingleChapter(b1);
+    if (uvod != -1) {
+      Prn(&out, "<p><a href=\"pismo.cgi?uvod=%d\">%s</a>: ", uvod, b1);
+    } else {
+      Prn(&out, "<p> %s: ", b1);
+    }
     if (!single_chapter) {
-      Prn(&out, "<p> %s: <a href=\"pismo.cgi?c=%s%d\">%d</a>", b1, b1, h1, h1);
+      Prn(&out, "<a href=\"pismo.cgi?c=%s%d\">%d</a>", b1, h1, h1);
     }
     for (get_next(b1, h1, &b2, &h2);
           b2 != NULL && !strcmp(b1,b2); 
@@ -255,12 +267,13 @@ void TOC() {
       h2prev = h2;
     }
     if (single_chapter) {
-      Prn(&out, "<p> <a href=\"pismo.cgi?c=%s%d-%d\">%s</a>", b1, h1, h2prev, b1);
+      Prn(&out, "<a href=\"pismo.cgi?c=%s%d-%d\">všetko</a>", b1, h1, h2prev);
     }
     Prn(&out, "\n");
     free(b1);
     b1 = b2;
     h1 = h2;
+    if (uvod != -1) uvod_prev = uvod;
   }
 }
 
@@ -513,7 +526,14 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     const char* kniha = get_uvod_kniha(uvod);
     Prn(&out, "<title>%s</title>\n"
         "</head><body>\n"
-        "<div class=\"nadpis\">%s</div>\n\n%s", kniha, kniha, get_uvod(uvod));
+        "<div class=\"nadpis\">%s</div>\n\n%s<p>", kniha, kniha, get_uvod(uvod));
+    if (uvod > 0 ) {
+      Prn(&out, // "<p>\n"
+          "<a href=\"pismo.cgi?uvod=%d\">Dozadu</a>", uvod - 1);
+      Prn(&out, "&nbsp; &nbsp;");
+    }
+    Prn(&out, // "<p>\n"
+        "<a href=\"pismo.cgi?uvod=%d\">Dopredu</a>", uvod + 1);
   } else if (obsah) {
     Prn(&out, "<title>Obsah</title>\n"
         "</head><body><div id=\"contentRoot\">\n"
