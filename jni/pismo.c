@@ -225,14 +225,34 @@ char *StringEncode(char *in) {
   return (char *)out;
 }
 
+int IsSingleChapter(const char* b) {
+  return !strcmp(b, "Flm") ||
+         !strcmp(b, "2Jn") ||
+         !strcmp(b, "3Jn") ||
+         !strcmp(b, "Júd");
+}
+
 void TOC() {
   char *b1, *b2, *q;
-  int h1, h2;
+  int h1, h2, h2prev;
   get_first(&b1, &h1);
   while (b1 != NULL) {
-    Prn(&out, "<p> %s: <a href=\"pismo.cgi?c=%s%d\">%d</a>", b1, b1, h1, h1);
-    for (get_next(b1, h1, &b2, &h2); b2!=NULL && !strcmp(b1,b2); q=b2, get_next(b2, h2, &b2, &h2), free(q))
-      Prn(&out, ", <a href=\"pismo.cgi?c=%s%d\">%d</a>", b2, h2, h2);
+    h2prev = h1;
+    int single_chapter = IsSingleChapter(b1);
+    if (!single_chapter) {
+      Prn(&out, "<p> %s: <a href=\"pismo.cgi?c=%s%d\">%d</a>", b1, b1, h1, h1);
+    }
+    for (get_next(b1, h1, &b2, &h2);
+          b2 != NULL && !strcmp(b1,b2); 
+          q = b2, get_next(b2, h2, &b2, &h2), free(q)) {
+      if (!single_chapter) {
+        Prn(&out, ", <a href=\"pismo.cgi?c=%s%d\">%d</a>", b2, h2, h2);
+      }
+      h2prev = h2;
+    }
+    if (single_chapter) {
+      Prn(&out, "<p> <a href=\"pismo.cgi?c=%s%d-%d\">%s</a>", b1, h1, h2prev, b1);
+    }
     Prn(&out, "\n");
     free(b1);
     b1 = b2;
@@ -245,9 +265,17 @@ void ShortTOC() {
   int h1, h2, lasth;
   get_first(&b1, &h1);
   while (b1 != NULL) {
-    Prn(&out, "<span style=\"display: inline-block; min-width:7em;\">%s:&nbsp;<a href=\"pismo.cgi?c=%s%d\">%d</a>-", b1, b1, h1, h1);
+    int single_chapter = IsSingleChapter(b1);
+    Prn(&out, "<span style=\"display: inline-block; min-width:7em;\">");
+    if (!single_chapter) {
+      Prn(&out, "%s:&nbsp;<a href=\"pismo.cgi?c=%s%d\">%d</a>-", b1, b1, h1, h1);
+    }
     for (get_next(b1, h1, &b2, &h2); b2!=NULL && !strcmp(b1,b2); q=b2, get_next(b2, h2, &b2, &h2), free(q)) lasth = h2;
-    Prn(&out, "<a href=\"pismo.cgi?c=%s%d\">%d</a></span>", b1, lasth, lasth);
+    if (!single_chapter) {
+      Prn(&out, "<a href=\"pismo.cgi?c=%s%d\">%d</a></span>", b1, lasth, lasth);
+    } else {
+      Prn(&out, "<a href=\"pismo.cgi?c=%s%d-%d\">%s</a></span>", b1, h1, lasth, b1);
+    }
     Prn(&out, "\n");
     free(b1);
     b1 = b2;
