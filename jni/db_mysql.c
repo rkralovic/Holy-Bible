@@ -180,3 +180,18 @@ int get_fulltext_result(char **b, int *h, int *v, char **t) {
   *t = row[3];
   return 1;
 }
+
+const char* get_uvod(int id) {
+  // TODO(riso): implement me
+  return "";
+}
+
+const char* get_uvod_kniha(int id) {
+  // TODO(riso): implement me
+  return "";
+}
+
+int get_uvod_pre_knihu(const char* b) {
+  // TODO(riso): implement me
+  return 0;
+}

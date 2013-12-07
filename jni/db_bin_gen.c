@@ -232,7 +232,24 @@ int main() {
       sscanf(row[3], "%d", &ITM[j].e);
       j++;
     }
+    mysql_free_result(result);
   }
+
+  mysql_query(conn, "select o.id, o.popis, o.text "
+      "from doc__biblia_uvod o "
+      "order by o.id asc");
+  result = mysql_store_result(conn);
+  HDR->n_uvod = mysql_num_rows(result);
+  ASGN(HDR->uvod, buf_alloc(HDR->n_uvod * sizeof(struct uvod)));
+#define UVD ((struct uvod *)(buf+HDR->uvod))
+  i=0;
+  while ((row = mysql_fetch_row(result))) {
+    int j;
+
+    ASGN(UVD[i].kniha, buf_add(row[1], strlen(row[1])+1));
+    ASGN(UVD[i].text, buf_add(row[2], strlen(row[2])+1));
+  }
+  mysql_free_result(result);
 
   dump("pismo.bin");
   mysql_close(conn);

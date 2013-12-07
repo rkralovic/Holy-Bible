@@ -15,6 +15,7 @@ char *zalm, *aleluja;
 int kalendar;
 int html_id;
 int comments = 1;
+int uvod_kniha = -1;
 
 struct strbuf kontext, out;
 
@@ -58,6 +59,9 @@ void Print(struct casti *_c) {
     if (first.h==-1) {
       first.h=hb;
       first.k=k;
+    }
+    if (uvod_kniha < 0) {
+      uvod_kniha = get_uvod_pre_knihu(k);
     }
     if (hb!=kontext_last_hb || he!=kontext_last_he) {
       if (hb!=he) Prn(&kontext, ";%s%d-%d", k, hb,he);
@@ -172,7 +176,7 @@ char *StringDecode(char *in) {
     }
   }
   out=(char *)malloc(i+1);
-    
+
   for (s=in,i=0; *s; s++,i++) {
     if (s[0]=='%') {
 
@@ -181,7 +185,7 @@ char *StringDecode(char *in) {
       out[i]*=16;
       if ( (s[2]>='A')&&(s[2]<='F') ) out[i]+=s[2]-'A'+10;
       else out[i]+=s[2]-'0';
-      
+
       s+=2;
     }
 //    } else if (s[0]=='+') out[i]=' ';
@@ -289,11 +293,12 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   char *coord=NULL;
   char *search=NULL;
   char *obsah=NULL;
+  int uvod=-1;
   char buf[1024];
   char *tmp;
 
   time_t t;
-  struct tm *tt;
+  // struct tm *tt;
 
   aleluja = zalm = NULL;
 
@@ -312,7 +317,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     s = strstr(qstr, "d="); if (s) sscanf(s, "d=%d", &d);
     s = strstr(qstr, "m="); if (s) sscanf(s, "m=%d", &m);
     s = strstr(qstr, "y="); if (s) sscanf(s, "y=%d", &y);
-    s = strstr(qstr, "c="); 
+    s = strstr(qstr, "c=");
     if (s) s+=2; else { // spatna kompatibilita so znackami
       s = strstr(qstr, "in=");
       if (s) s+=3;
@@ -322,29 +327,33 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
       sscanf(s, "%1000[^&]", query);
       coord=StringDecode(query);
     }
-    s = strstr(qstr, "obsah="); 
+    s = strstr(qstr, "obsah=");
     if (s) {
       query[0]=0;
       sscanf(s+6, "%1000[^&]", query);
       obsah = StringDecode(query);
     }
-    s = strstr(qstr, "search="); 
+    s = strstr(qstr, "search=");
     if (s) {
       query[0]=0;
       sscanf(s+7, "%1000[^&]", query);
       search = StringDecode(query);
     }
-    s = strstr(qstr, "zalm="); 
+    s = strstr(qstr, "zalm=");
     if (s) {
       query[0]=0;
       sscanf(s+5, "%1000[^&]", query);
       zalm = StringDecode(query);
     }
-    s = strstr(qstr, "aleluja="); 
+    s = strstr(qstr, "aleluja=");
     if (s) {
       query[0]=0;
       sscanf(s+8, "%1000[^&]", query);
       aleluja = StringDecode(query);
+    }
+    s = strstr(qstr, "uvod=");
+    if (s) {
+      sscanf(s+5, "%d", &uvod);
     }
   }
 
@@ -410,8 +419,13 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
       Prn(&out, // "<p>\n"
           "<a href=\"pismo.cgi?c=%s\">Kontext</a>", tmp);
       free(tmp);
+      Prn(&out, "&nbsp; &nbsp;");
     }
-    Prn(&out, "&nbsp; &nbsp;");
+    if (uvod_kniha >= 0 ) {
+      Prn(&out, // "<p>\n"
+          "<a href=\"pismo.cgi?uvod=%d\">Úvod</a>", uvod_kniha);
+      Prn(&out, "&nbsp; &nbsp;");
+    }
     if (first.h!=-1) {
       char *b;
       int h;
@@ -429,8 +443,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     if (last.h!=-1){
       char *b;
       int h;
-      get_next(last.k, last.h, &b, &h);
-      if (b!=NULL) {
+      get_next(last.k, last.h, &b, &h); if (b!=NULL) {
         snprintf(buf, sizeof(buf), "%s %d", b, h);
         tmp = StringEncode(buf);
         Prn(&out, // "<p>\n"
@@ -496,6 +509,11 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     */
     free_scan_string();
 
+  } else if (uvod >= 0) {
+    const char* kniha = get_uvod_kniha(uvod);
+    Prn(&out, "<title>%s</title>\n"
+        "</head><body>\n"
+        "<div class=\"nadpis\">%s</div>\n\n%s", kniha, kniha, get_uvod(uvod));
   } else if (obsah) {
     Prn(&out, "<title>Obsah</title>\n"
         "</head><body><div id=\"contentRoot\">\n"
@@ -550,7 +568,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   comments = _comments;
   qstr = (*env)->GetStringUTFChars(env, querystring, NULL);
   __android_log_print(ANDROID_LOG_INFO, "svpismo", "qstr = %s\n", qstr);
-    
+
   if (db_init() < 0) return (*env)->NewStringUTF(env, "");
 
   CommonMain(qstr, (*env)->GetDirectBufferAddress(env,_css), css_len);
