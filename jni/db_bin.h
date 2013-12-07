@@ -9,12 +9,18 @@ struct header {
   int32_t n_text, text;
   int32_t n_ppc, ppc;
   int32_t n_kalendar, kalendar;
+  int32_t n_uvod, uvod;
   int32_t n_item[TABLES], item[TABLES];
 };
 
 struct kniha {
   int32_t meno, alias, n_hlav, hlava;
   int32_t min, max;
+};
+
+struct uvod {
+  int32_t kniha;
+  int32_t text;
 };
 
 struct hlava {

@@ -142,7 +142,7 @@ static int cmp(const char *a, const char *b) {
   return out;
 }
 
-static int find_book(char *s) {
+static int find_book(const char *s) {
   int i;
   for (i=0; i<hdr->n_knihy; i++) {
     if (!cmp( s, STR(knh[i].meno) )) return i;
@@ -151,7 +151,7 @@ static int find_book(char *s) {
   return -1;
 }
 
-char *check_book(char *s) {
+char *check_book(const char *s) {
   int i;
   char *out;
   i = find_book(s);
@@ -365,4 +365,31 @@ int get_fulltext_result(char **b, int *hl, int *v, char **txt) {
     free(x);
   }
   return 0;
+}
+
+const char* get_uvod(int id) {
+  if (id < 0) return "";
+  if (id >= hdr->n_uvod) return "";
+  return STR(((struct uvod *)(base + hdr->uvod))[id].text);
+}
+
+const char* get_uvod_kniha(int id) {
+  if (id < 0) return "";
+  if (id >= hdr->n_uvod) return "";
+  return STR(((struct uvod *)(base + hdr->uvod))[id].kniha);
+}
+
+int get_uvod_pre_knihu(const char* b) {
+  int i, b_id;
+  const char* b_name;
+
+  b_id = find_book(b);
+  if (b_id < 0) return -1;
+  if (b_id >= hdr->n_knihy) return -1;
+  b_name = STR(((struct kniha *)(base+hdr->knihy))[b_id].meno);
+
+  for (i = 0; i < hdr->n_uvod; ++i) {
+    if (!strcmp(b_name, STR(((struct uvod *)(base + hdr->uvod))[i].kniha))) return i;
+  }
+  return -1;
 }
