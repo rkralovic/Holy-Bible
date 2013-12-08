@@ -418,6 +418,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   Rst(&kontext);
   kontext_last_hb=kontext_last_he=-1;
   first.h=last.h=-1;
+  uvod_kniha = -1;
 
   if (coord && d==-1) {
     Prn(&out, "<title>%s</title>\n"
