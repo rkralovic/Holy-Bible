@@ -1,7 +1,7 @@
 CFLAGS+=-O0 -ggdb -DNOANDROID
 LDFLAGS+=-O0 -ggdb -DNOANDROID
 
-all: pismo pismo.cgi db_bin_gen
+all: pismo pismo.cgi db_bin_gen db_bin_to_ebook
 
 pismo.cgi: pismo.o parser.tab.o scanner.o common.o db_mysql.o
 	$(CC) $(LDFLAGS) $^ -o $@ -lmysqlclient
@@ -11,6 +11,13 @@ pismo: pismo.o parser.tab.o scanner.o common.o db_bin.o
 
 db_bin_gen: db_bin_gen.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lmysqlclient
+
+db_bin_to_ebook: db_bin_to_ebook.o db_bin.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lmysqlclient
+
+pismo.mobi: db_bin_to_ebook
+	./db_bin_to_ebook >/tmp/pismo.html
+	ebook-convert /tmp/Pismo.html ./Pismo.mobi --max-toc-links 500 --level1-toc '//*[@class="kniha"]|//h:h1' --level2-toc '//*[@class="kap"]'
 
 %.o: %.c
 	$(CC) -Wall -W -c -I$(OPIEDIR)/usr/include/mysql $(CFLAGS) $<

@@ -48,3 +48,6 @@ struct kalendar {
 
 extern void *db;
 extern int db_len;
+
+// Lowlevel access
+void *GetBase();

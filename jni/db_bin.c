@@ -142,7 +142,7 @@ static int cmp(const char *a, const char *b) {
   return out;
 }
 
-static int find_book(const char *s) {
+int find_book(const char *s) {
   int i;
   for (i=0; i<hdr->n_knihy; i++) {
     if (!cmp( s, STR(knh[i].meno) )) return i;
@@ -392,4 +392,8 @@ int get_uvod_pre_knihu(const char* b) {
     if (!cmp(b_name, STR(((struct uvod *)(base + hdr->uvod))[i].kniha))) return i;
   }
   return -1;
+}
+
+void* GetBase() {
+  return base;
 }
