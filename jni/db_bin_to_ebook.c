@@ -38,14 +38,57 @@ void cb_obsah_kniha(int kniha) {
   printf("<li><a href=\"#%s\">%s</a>\n", meno, meno);
 }
 
+// TODO: dealokovat
+void Process(struct citania *l) {
+  int h, v;
+  if (l == NULL) return;
+  if (l->l == NULL) return;
+  if (l->l->l == NULL) return;
+  h = l->l->l->h;
+  v = l->l->l->v;
+  if (h < 1) { h = 1; v = 1; }
+  if (v < 1) { v = 1; }
+  printf("%s%d,%d", l->l->l->k, h, v);
+}
+
+void TranslateLinksAndPrint(char* s) {
+  static const char *href = "href='?in=";
+  char *e, *tmp;
+  while (1) {
+    e = strstr(s, href);
+    if (e == NULL) break;
+
+    tmp = strndup(s, e - s);
+    printf("%shref='#", tmp);
+    free(tmp);
+    e += strlen(href);
+
+    s = strstr(e, "'>");
+    if (s == NULL) return;  // should not happen
+
+    tmp = strndup(e, s - e);
+    // workaround bison bug
+    if (tmp[strlen(tmp) - 1] == ';') {
+      tmp[strlen(tmp) - 1] = 0;
+    }
+    scan_string(tmp);
+    yyparse();
+    free_scan_string();
+    free(tmp);
+  }
+  printf("%s", s);
+}
+
 void cb_main_uvod(int uvod) {
-  printf("\n\n<a name=\"uvod_%d\">\n%s\n\n", uvod, GETSTR(UVOD[uvod].text));
+  printf("\n\n<a name=\"uvod_%d\">\n", uvod);
+  TranslateLinksAndPrint(GETSTR(UVOD[uvod].text));
 }
 
 int html_id = 0;
 void cb_main_kniha(int kniha) {
   int comment;
   char *s;
+  int h, v, id;
 
   char* meno = GETSTR(KNIHA[kniha].meno);
   printf("\n\n<a name=\"%s\">\n", meno);
@@ -54,12 +97,33 @@ void cb_main_kniha(int kniha) {
   add_search(1, 1, -1, -1);
   do_search();
 
-  while (get_result(&comment, &s)) {
+  h = 0; v = 0;
+  while (get_result_id(&comment, &s, &id)) {
     if (!comment) {
-      printf("%s\n", s);
+      while (1) {
+        // normalize h / v
+        while (1) {
+          if (h >= KNIHA[kniha].n_hlav) {
+            h = -1;
+            break;
+          } else if (v >= GETPTR(hlava, KNIHA[kniha].hlava)[h].n_versov) {
+            v = 0;
+            h++;
+          } else break;
+        }
+        if (h >= 0 &&
+            GETPTR(vers, (GETPTR(hlava, KNIHA[kniha].hlava)[h].vers))[v].min <= id) {
+          printf("<a name=\"%s%d,%d\">\n", meno, h + 1, v + 1);
+          v++;
+        } else break;
+      }
+      TranslateLinksAndPrint(s);
+      printf("\n");
     } else {
       printf("<span id=\"e%d\" ", html_id);
-      printf("class=\"komentar\">(%s)</span>\n", s);
+      printf("class=\"komentar\">(");
+      TranslateLinksAndPrint(s);
+      printf(")</span>\n");
       html_id++;
     }
   }

@@ -264,13 +264,18 @@ void do_search() {
   qsort(res, n, sizeof(struct res_t), (int (*)(const void*, const void*))cmp_res);
 }
 
-int get_result(int *c, char **s) {
+int get_result_id(int *c, char **s, int *id) {
   while (m<n && res[m].id==res[m+1].id && res[m].comment==res[m+1].comment) m++;
   if (m>=n) return 0;
   *c = res[m].comment;
   *s = STR( res[m].t );
+  if (id) *id = res[m].id;
   m++;
   return 1;
+}
+
+int get_result(int *c, char **s) {
+  return get_result_id(c, s, NULL);
 }
 
 static int cmp_date(int y1, int m1, int d1, int y2, int m2, int d2) {

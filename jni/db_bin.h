@@ -51,3 +51,4 @@ extern int db_len;
 
 // Lowlevel access
 void *GetBase();
+int get_result_id(int *c, char **s, int *id);
