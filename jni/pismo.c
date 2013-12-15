@@ -425,6 +425,10 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
       "</head><body><div id=\"contentRoot\">\n"
       "<div class=\"nadpis\">%s</div>\n\n", coord, coord);
     kalendar = 0;
+    // workaround bison bug
+    if (coord[strlen(coord) - 1] == ';') {
+      coord[strlen(coord) - 1] = 0;
+    }
     scan_string(coord);
     yyparse();
 

@@ -1,9 +1,7 @@
 /* apply to all elements, used for <span> (character style) and <div> (paragraph style), 2005-07-27 */
 .red { color: #ff0000; }
-label { color: #ff0000; }
+label { color: #ff0000; font-size: 150%; }
 var { color: #999999; }
-.kniha { font-size: 180%; }
-.kap { font-size: 150%; }
 .blue { color: DarkBlue; }
 .redsmall { color: #ff0000; font-size: 80%; }
 .tagMajor { color: #ff0000; font-size: 80%; }

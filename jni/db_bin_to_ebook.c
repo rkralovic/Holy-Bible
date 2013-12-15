@@ -103,7 +103,7 @@ void cb_main_kniha(int kniha) {
       while (1) {
         // normalize h / v
         while (1) {
-          if (h >= KNIHA[kniha].n_hlav) {
+          if (h < 0 || h >= KNIHA[kniha].n_hlav) {
             h = -1;
             break;
           } else if (v >= GETPTR(hlava, KNIHA[kniha].hlava)[h].n_versov) {

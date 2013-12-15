@@ -15,7 +15,7 @@ db_bin_gen: db_bin_gen.o
 db_bin_to_ebook: db_bin_to_ebook.o db_bin.o parser.tab.o scanner.o common.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lmysqlclient
 
-pismo.mobi: db_bin_to_ebook
+pismo.mobi: db_bin_to_ebook ebook.css
 	./db_bin_to_ebook >/tmp/pismo.html
 	ebook-convert /tmp/pismo.html ./pismo.mobi \
           --max-toc-links 500 \
