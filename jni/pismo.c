@@ -106,8 +106,9 @@ void Process(struct citania *l) {
 
 //    Prn(&out, "citanie: %s\n", l->tag);
     if (l->tag != NULL) {
-      i = 0;
+      i = -1;
       Prn(&out, "<div class=\"tagMajor\">%s</div>\n\n", l->tag);
+      continue;
     }
     if (l->l && kalendar) {
       char *a = NULL;
@@ -118,13 +119,13 @@ void Process(struct citania *l) {
         }
       }
 
-      if (i%2 && l->n) {
+      if (i%2 && l->n && l->n->tag == NULL) {
         Prn(&out, "<div class=\"citanie\">Žalm</div>\n\n");
-        Prn(&out, "<p><span class=\"redbold\">R: </span><span class=\"it\">%s</span></p>\n\n", a ? a : zalm);
+        Prn(&out, "<p><span class=\"redbold\">R: </span><span class=\"it\">%s</span></p>\n\n", a ? a : zalm ? zalm : "");
       }
-      else if (l->n) Prn(&out, "<div class=\"citanie\">%d. čítanie</div>\n\n", i/2 + 1);
+      else if (l->n && l->n->tag == NULL) Prn(&out, "<div class=\"citanie\">%d. čítanie</div>\n\n", i/2 + 1);
       else {
-        Prn(&out, "<p><span class=\"redbold\">Aleluja: </span><span class=\"it\">%s</span></p>\n\n", a ? a : aleluja);
+        Prn(&out, "<p><span class=\"redbold\">Aleluja: </span><span class=\"it\">%s</span></p>\n\n", a ? a : aleluja ? aleluja : "");
         Prn(&out, "<div class=\"citanie\">Evanjelium</div>\n\n");
       }
 
