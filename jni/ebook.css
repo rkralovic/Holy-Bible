@@ -1,12 +1,12 @@
 /* apply to all elements, used for <span> (character style) and <div> (paragraph style), 2005-07-27 */
 .red { color: #ff0000; }
 label { color: #ff0000; font-size: 150%; }
-var { color: #999999; }
+var { color: #ff0000; }
 .blue { color: DarkBlue; }
 .redsmall { color: #ff0000; font-size: 80%; }
 .tagMajor { color: #ff0000; font-size: 80%; }
 .tagMinor { color: #ff0000; font-size: 80%; }
-.komentar { color: DarkBlue; font-size: 80%; }
+.komentar { color: DarkBlue; font-size: 80%; font-style: italic }
 .redbold { color: #ff0000; font-weight: bold; }
 .nadpis { color: #ff0000; font-size: 120%; font-weight: bold; text-align: center; padding-bottom: 1ex; }
 .bluebold { color: #0066ff; font-weight: bold; }
