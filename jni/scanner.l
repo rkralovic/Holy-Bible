@@ -50,7 +50,7 @@ IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]o
 \/al\.[^/]*\/  return OR;
 \/kr\.[^/]*\/  return OR;
 \|        return OR;
-:[^\r\n]*\r?\n?      yylval.id = duptag(yytext); return DESC;
+:[^\r\n;]*\r?\n?      yylval.id = duptag(yytext); return DESC;
 \{-[^}]*\}\r?\n?     yylval.id = duptag(yytext); return TAG_MINOR;
 \{[^-][^}]*\}\r?\n?  yylval.id = duptag(yytext); return TAG_MAJOR;
 \/[^/]*\/  // skip comments // strncpy(yylval.id, yytext, sizeof(yylval.id)); return COMMENT;
