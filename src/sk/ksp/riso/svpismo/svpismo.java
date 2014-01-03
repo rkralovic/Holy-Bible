@@ -138,6 +138,10 @@ public class svpismo extends Activity
           Intent I = getIntent();
           if (wv.restoreState(savedInstanceState) == null) {
             if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
+              if (I.hasExtra("nightmode")) {
+                nightmode = I.getBooleanExtra("nightmode", false);
+                syncPreferences();
+              }
               load("pismo.cgi?" + I.getData().getQuery());
             } else {
               load("pismo.cgi");
