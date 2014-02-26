@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.content.res.*;
-//import android.util.Log;
+import android.util.Log;
 import android.widget.Button;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -172,7 +172,13 @@ public class svpismo extends Activity
                 view.postDelayed(new Runnable() {
                   @Override
                   public void run() {
-                    final_view.evaluateJavascript("document.getElementById('contentRoot').style.width = window.innerWidth;", null);
+                    try {
+                      final_view.evaluateJavascript(
+                          "document.getElementById('contentRoot').style.width = window.innerWidth;",
+                          null);
+                    } catch (java.lang.IllegalArgumentException e) {
+                      Log.v("svpismo", "Cannot call evaluateJavascript. Cyanogenmod weirdness?");
+                    }
                     scaleChangedRunning = false;
                   }
                 }, 100);
