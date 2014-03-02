@@ -176,7 +176,7 @@ public class svpismo extends Activity
                       final_view.evaluateJavascript(
                           "document.getElementById('contentRoot').style.width = window.innerWidth;",
                           null);
-                    } catch (java.lang.IllegalArgumentException e) {
+                    } catch (java.lang.IllegalStateException e) {
                       Log.v("svpismo", "Cannot call evaluateJavascript. Cyanogenmod weirdness?");
                     }
                     scaleChangedRunning = false;
