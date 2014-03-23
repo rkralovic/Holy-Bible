@@ -11,6 +11,8 @@
     <string name="nightmode_off">Denný režim</string>
     <string name="fullscreen_on">Celá obrazovka</string>
     <string name="fullscreen_off">Zobraz navigáciu</string>
+    <string name="screenlock_on">Nezhasínať</string>
+    <string name="screenlock_off">Zhasínať</string>
     <string name="new_bookmark">Pridať záložku</string>
     <string name="edit_bookmark">Upraviť záložku</string>
     <string name="modify_bookmark_text">Upraviť</string>

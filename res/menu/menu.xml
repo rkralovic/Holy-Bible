@@ -16,6 +16,10 @@
         android:title="Celá obrazovka">
     </item>
 
+    <item android:id="@+id/screenlock_toggle"
+        android:title="Zhasínať">
+    </item>
+
     <item android:id="@+id/bookmarks"
         android:title="Záložky">
     </item>

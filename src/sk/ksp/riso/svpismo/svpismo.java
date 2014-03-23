@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.content.res.*;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Button;
 import android.view.KeyEvent;
@@ -35,9 +36,11 @@ public class svpismo extends Activity
 
     public WebView wv;
     boolean wv_initialized = false;
-    boolean comments, nightmode, fullscreen;
+    boolean comments, nightmode, fullscreen, screenlock;
     String active_url = "";
     final String toc_url = "pismo.php?obsah=long";
+
+    PowerManager.WakeLock lock;
 
     public void load(String url) {
       if (wv_initialized) {
@@ -74,6 +77,9 @@ public class svpismo extends Activity
 
         final svpismo myself = this;
 
+        lock = ((PowerManager)getSystemService(POWER_SERVICE))
+                   .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "spevnik");
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.svpismo);
 
@@ -82,6 +88,7 @@ public class svpismo extends Activity
         comments = settings.getBoolean("comments", true);
         nightmode = settings.getBoolean("nightmode", false);
         fullscreen = settings.getBoolean("fullscreen", false);
+        screenlock = settings.getBoolean("screenlock", true);
 //        Log.v("svpismo", "init with scale " + scale);
 
         wv = (WebView)findViewById(R.id.wv);
@@ -225,6 +232,7 @@ public class svpismo extends Activity
       editor.putBoolean("comments", comments);
       editor.putBoolean("nightmode", nightmode);
       editor.putBoolean("fullscreen", fullscreen);
+      editor.putBoolean("screenlock", screenlock);
       editor.commit();
     }
 
@@ -264,6 +272,15 @@ public class svpismo extends Activity
         case R.id.fullscreen_toggle:
           fullscreen = !fullscreen;
           updateFullscreen();
+          syncPreferences();
+          return true;
+        case R.id.screenlock_toggle:
+          screenlock = !screenlock;
+          if (screenlock) {
+            lock.acquire();
+          } else {
+            lock.release();
+          }
           syncPreferences();
           return true;
         case R.id.bookmarks:
@@ -332,6 +349,11 @@ public class svpismo extends Activity
       } else {
         menu.findItem(R.id.fullscreen_toggle).setTitle(R.string.fullscreen_on);
       }
+      if (screenlock) {
+        menu.findItem(R.id.screenlock_toggle).setTitle(R.string.screenlock_off);
+      } else {
+        menu.findItem(R.id.screenlock_toggle).setTitle(R.string.screenlock_on);
+      }
       return super.onPrepareOptionsMenu(menu);
     }
 
@@ -359,5 +381,21 @@ public class svpismo extends Activity
         params.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
       }
       getWindow().setAttributes(params);
+    }
+
+    @Override
+    protected void onResume() {
+      if (screenlock) {
+        lock.acquire();
+      }
+      super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+      super.onPause();
+      if (screenlock) {
+        lock.release();
+      }
     }
 }
