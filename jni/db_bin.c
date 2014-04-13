@@ -17,6 +17,7 @@
 static void *base;
 void *db;
 int db_len;
+int active_translation = TRANSLATION_SSV;
 
 static const struct header *hdr;
 static const struct kniha *knh;
@@ -205,11 +206,19 @@ static int get_id(int comment, int id, int e) {
   else return e;
 }
 
+static int get_trans(const struct text* txt) {
+  if (active_translation == TRANSLATION_NVG) {
+    return txt->t_nvg;
+  } else {
+    return txt->t;
+  }
+}
+
 static int get_t(int comment, int id) {
   if (comment) {
     return ((int32_t *)(base+hdr->ppc))[id];
   } else {
-    return ((struct text *)(base+hdr->text))[id].t;
+    return get_trans(&((struct text *)(base+hdr->text))[id]);
   }
 }
 
@@ -268,7 +277,7 @@ int get_result_id(int *c, char **s, int *id) {
   while (m<n && res[m].id==res[m+1].id && res[m].comment==res[m+1].comment) m++;
   if (m>=n) return 0;
   *c = res[m].comment;
-  *s = STR( res[m].t );
+  *s = STR(res[m].t);
   if (id) *id = res[m].id;
   m++;
   return 1;
@@ -357,14 +366,14 @@ void free_fulltext_search() {
 int get_fulltext_result(char **b, int *hl, int *v, char **txt) {
   while (m<hdr->n_text) {
     struct text *t = (struct text *)(base+hdr->text);
-    char *x = Normalize(STR( t[m].t));
+    char *x = Normalize(STR(get_trans(&t[m])));
     m++;
     if (strstr(x, search)!=NULL) {
       *b = STR( ((struct kniha *)(base+hdr->knihy))[t[m-1].k].meno);
       *hl = t[m-1].h+1;
       *v = t[m-1].v+1;
       if (*v == 0) *v = -1;
-      *txt = STR(t[m-1].t);
+      *txt = STR(get_trans(&t[m-1]));
       return 1;
     }
     free(x);
@@ -401,4 +410,8 @@ int get_uvod_pre_knihu(const char* b) {
 
 void* GetBase() {
   return base;
+}
+
+void set_translation(int translation) {
+  active_translation = translation;
 }

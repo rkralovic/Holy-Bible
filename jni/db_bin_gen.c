@@ -35,6 +35,7 @@ int buf_alloc(int l) {
     buf = realloc(buf, alloc);
   }
   len += l;
+  memset(buf + len - l, 0, l);
   return len-l;
 };
 
@@ -127,7 +128,12 @@ int main() {
 #define VRS ((struct vers *)(buf+HLV[j].vers))
         row2 = mysql_fetch_row(result2);
         sscanf(row2[0], "%d", &l);
-        if (l-1 != k) { fprintf(stderr, "nesuvisle id versa k=%d h=%d v=%d!=%d\n", i+1, j+1, l, k+1); exit(1); }
+        if (l-1 != k) {
+          fprintf(stderr, "nesuvisle id versa k=%d h=%d v=%d!=%d, ignorujem\n", i+1, j+1, l, k+1);
+          k--;
+          HLV[j].n_versov--;
+          continue;
+        }
         sscanf(row2[1], "%d", &VRS[k].min);
         sscanf(row2[2], "%d", &VRS[k].max);
         // printf("k=%d min=%d=%s max=%d=%s\n", k, VRS[k].min, row2[1], VRS[k].max, row2[2]);
@@ -146,7 +152,9 @@ int main() {
   sscanf(row[0], "%d", &HDR->n_text);
   mysql_free_result(result);
 
-  mysql_query(conn, "select id, _0-1, coalesce(_1, 0)-1, coalesce(_2, 0)-1, coalesce(html,'') from doc__biblia_text where _0 is not null order by id asc");
+  mysql_query(conn, "select id, _0-1, coalesce(_1, 0)-1, coalesce(_2, 0)-1, "
+                    "    coalesce(html,''), coalesce(nvg_html,'') "
+                    "from doc__biblia_text where _0 is not null order by id asc");
   result = mysql_store_result(conn);
   i=0;
   ASGN(HDR->text, buf_alloc(sizeof(struct text)*HDR->n_text));
@@ -164,6 +172,7 @@ int main() {
     sscanf(row[2], "%d", &TXT[i].h);
     sscanf(row[3], "%d", &TXT[i].v);
     ASGN(TXT[i].t, buf_add(row[4], strlen(row[4])+1));
+    ASGN(TXT[i].t_nvg, buf_add(row[5], strlen(row[5])+1));
     // printf("txt %d = %s\n", i, row[4]);
     i++;
   }

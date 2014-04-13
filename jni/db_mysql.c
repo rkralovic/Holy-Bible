@@ -195,3 +195,7 @@ int get_uvod_pre_knihu(const char* b) {
   // TODO(riso): implement me
   return 0;
 }
+
+void set_translation(int translation) {
+  // TODO(riso): implement me
+}

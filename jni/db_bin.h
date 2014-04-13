@@ -1,5 +1,6 @@
-#define SIGNATURE 0xADDE1610
+#define SIGNATURE 0xADDE1611
 #include <stdint.h>
+#include "db.h"
 
 #define TABLES 16  // malo by byt zhruba log_2(pocet zaznamov)
 
@@ -34,7 +35,7 @@ struct vers {
 
 struct text {
   int32_t k, h, v;
-  int32_t t;
+  int32_t t, t_nvg;
 };
 
 struct item {

@@ -1,6 +1,6 @@
 int db_init();
 void db_close();
-char *check_book(char *s);
+char *check_book(const char *s);
 void init_search(char *b);
 void free_search();
 void add_search(int hb, int vb, int he, int ve);
@@ -18,3 +18,8 @@ int get_fulltext_result(char **b, int *h, int *v, char **t);
 const char* get_uvod_kniha(int id);
 const char* get_uvod(int id);
 int get_uvod_pre_knihu(const char* b);
+
+// Selection of translation
+#define TRANSLATION_SSV 1
+#define TRANSLATION_NVG 2
+void set_translation(int translation);
