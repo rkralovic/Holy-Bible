@@ -22,4 +22,6 @@
     <string name="update_label_text">Aktualizovať pozíciu</string>
     <string name="delete_bookmark_text">Zmazať</string>
     <string name="toc_text">Obsah</string>
+    <string name="translation_ssv">Preklad SSV</string>
+    <string name="translation_nvg">Preklad NVg</string>
 </resources>

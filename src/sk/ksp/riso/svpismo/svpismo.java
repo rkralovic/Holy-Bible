@@ -35,7 +35,7 @@ public class svpismo extends Activity {
 
     public WebView wv;
     boolean wv_initialized = false;
-    boolean comments, nightmode, fullscreen, screenlock;
+    boolean comments, nightmode, fullscreen, screenlock, translation_nvg;
     String active_url = "";
     final String toc_url = "pismo.php?obsah=long";
 
@@ -89,6 +89,7 @@ public class svpismo extends Activity {
         nightmode = settings.getBoolean("nightmode", false);
         fullscreen = settings.getBoolean("fullscreen", false);
         screenlock = settings.getBoolean("screenlock", true);
+        translation_nvg = settings.getBoolean("translation_nvg", false);
 //        Log.v("svpismo", "init with scale " + scale);
 
         wv = (WebView)findViewById(R.id.wv);
@@ -215,7 +216,11 @@ public class svpismo extends Activity {
         } catch (IOException e) {
           wv.loadData("Some problem.", "text/html", "utf-8");
         }
-        setTranslationNvg();
+        if (translation_nvg) {
+          setTranslationNvg();
+        } else {
+          setTranslationSsv();
+        }
     }
 
     protected void onSaveInstanceState(Bundle outState) {
@@ -234,6 +239,7 @@ public class svpismo extends Activity {
       editor.putBoolean("nightmode", nightmode);
       editor.putBoolean("fullscreen", fullscreen);
       editor.putBoolean("screenlock", screenlock);
+      editor.putBoolean("translation_nvg", translation_nvg);
       editor.commit();
     }
 
@@ -283,6 +289,16 @@ public class svpismo extends Activity {
             lock.release();
           }
           syncPreferences();
+          return true;
+        case R.id.translation:
+          translation_nvg = !translation_nvg;
+          if (translation_nvg) {
+            setTranslationNvg();
+          } else {
+            setTranslationSsv();
+          }
+          syncPreferences();
+          load(active_url);
           return true;
         case R.id.bookmarks:
 	  Intent i = new Intent(this, Bookmarks.class);
@@ -357,6 +373,11 @@ public class svpismo extends Activity {
         menu.findItem(R.id.screenlock_toggle).setTitle(R.string.screenlock_off);
       } else {
         menu.findItem(R.id.screenlock_toggle).setTitle(R.string.screenlock_on);
+      }
+      if (translation_nvg) {
+        menu.findItem(R.id.translation).setTitle(R.string.translation_ssv);
+      } else {
+        menu.findItem(R.id.translation).setTitle(R.string.translation_nvg);
       }
       return super.onPrepareOptionsMenu(menu);
     }
