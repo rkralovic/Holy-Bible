@@ -25,8 +25,7 @@ import java.nio.channels.*;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
-public class svpismo extends Activity
-{
+public class svpismo extends Activity {
     static final String TAG = "svpismo";
     static final String prefname = "SvPismoPrefs";
     MappedByteBuffer db, css, css_inv;
@@ -215,6 +214,7 @@ public class svpismo extends Activity
         } catch (IOException e) {
           wv.loadData("Some problem.", "text/html", "utf-8");
         }
+        setTranslationNvg();
     }
 
     protected void onSaveInstanceState(Bundle outState) {
@@ -324,6 +324,9 @@ public class svpismo extends Activity
 
     public native String process(ByteBuffer db, long db_len, ByteBuffer css,
         long css_len, String querystring, boolean comments);
+
+    public native void setTranslationSsv();
+    public native void setTranslationNvg();
 
     static {
         System.loadLibrary("pismo");

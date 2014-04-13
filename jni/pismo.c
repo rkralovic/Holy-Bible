@@ -609,4 +609,12 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   FreeBuf(&out);
   return jout;
 }
+
+void Java_sk_ksp_riso_svpismo_svpismo_setTranslationSsv(JNIEnv* env, jobject this) {
+  set_translation(TRANSLATION_SSV);
+}
+
+void Java_sk_ksp_riso_svpismo_svpismo_setTranslationNvg(JNIEnv* env, jobject this) {
+  set_translation(TRANSLATION_NVG);
+}
 #endif
