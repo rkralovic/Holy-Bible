@@ -42,6 +42,7 @@ public class svpismo extends Activity {
     PowerManager.WakeLock lock;
 
     public void load(String url) {
+      Log.v("svpismo", "load: " + url);
       if (wv_initialized) {
         scale = (int)(wv.getScale()*100);
 //        Log.v("svpismo", "load: getScale " + scale);

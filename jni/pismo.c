@@ -301,6 +301,10 @@ void ShortTOC() {
   }
 }
 
+const char* BrokenKitKat() {
+  return "onload=\"InitLinksForBrokenKitKat()\"";
+}
+
 void CommonMain(const char* qstr, const char* css, int css_len) {
   int d,m,y;
   char query[1024];
@@ -372,6 +376,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   }
 
   InitBuf(&out); Rst(&out);
+  Prn(&out, "<!DOCTYPE html>\n");
   Prn(&out, "<html><head>\n"
 //      "<link rel=\"stylesheet\" href=\"breviar.css\">\n"
       "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n"
@@ -413,6 +418,19 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
       "  ToggleClass(eid);\n"
       "  ToggleClass(eid+\"f\");\n"
       "}\n"
+      "function AddOnClick(element) {\n"
+      "  var myelement = element;\n"
+      "  element.onclick = function () {\n"
+      "    bridge.loadit(myelement.getAttribute('href'));\n"
+      "    return false;\n"
+      "  }\n"
+      "}\n"
+      "function InitLinksForBrokenKitKat() {\n"
+      "  var elements = document.getElementsByTagName('a');\n"
+      "  for(var i = 0, len = elements.length; i < len; i++) {\n"
+      "    AddOnClick(elements[i]);\n"
+      "  }\n"
+      "}\n"
       "</script>\n");
 
   InitBuf(&kontext);
@@ -423,8 +441,8 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
 
   if (coord && d==-1) {
     Prn(&out, "<title>%s</title>\n"
-      "</head><body><div id=\"contentRoot\">\n"
-      "<div class=\"nadpis\">%s</div>\n\n", coord, coord);
+      "</head><body %s><div id=\"contentRoot\">\n"
+      "<div class=\"nadpis\">%s</div>\n\n", coord, BrokenKitKat(), coord);
     kalendar = 0;
     // workaround bison bug
     if (coord[strlen(coord) - 1] == ';') {
@@ -478,9 +496,9 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     int h,v,cnt;
 
     Prn(&out, "<title>Vyhľadávanie \"%s\"</title>\n"
-        "</head><body><div id=\"contentRoot\">\n"
+        "</head><body %s><div id=\"contentRoot\">\n"
         "<div class=\"nadpis\">Vyhľadávanie \"%s\"</div>\n\n",
-        search, search);
+        search, BrokenKitKat(), search);
 
     fulltext_search(search);
     for (cnt=0; get_fulltext_result(&b, &h, &v, &t); cnt++) {
@@ -512,9 +530,9 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     //  Prn(&out, "%s %s %s %s\n", row[0], row[1], row[2], row[3]);
 
     Prn(&out, "<title>Čítania na %d.%d.%d</title>\n"
-        "</head><body><div id=\"contentRoot\">\n"
+        "</head><body %s><div id=\"contentRoot\">\n"
         "<div class=\"nadpis\">Liturgické čítania na %d.%d.%d</div>\n\n",
-        d,m,y,d,m,y);
+        d,m,y, BrokenKitKat(), d,m,y);
     scan_string(coord);
     yyparse();
 
@@ -531,8 +549,8 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   } else if (uvod >= 0) {
     const char* kniha = get_uvod_kniha(uvod);
     Prn(&out, "<title>%s</title>\n"
-        "</head><body>\n"
-        "<div class=\"nadpis\">%s</div>\n\n%s<p>", kniha, kniha, get_uvod(uvod));
+        "</head><body %s>\n"
+        "<div class=\"nadpis\">%s</div>\n\n%s<p>", kniha, BrokenKitKat(), kniha, get_uvod(uvod));
     if (uvod > 0 ) {
       Prn(&out, // "<p>\n"
           "<a href=\"pismo.cgi?uvod=%d\">Dozadu</a>", uvod - 1);
@@ -542,13 +560,13 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
         "<a href=\"pismo.cgi?uvod=%d\">Dopredu</a>", uvod + 1);
   } else if (obsah) {
     Prn(&out, "<title>Obsah</title>\n"
-        "</head><body><div id=\"contentRoot\">\n"
-        "<div class=\"nadpis\">Obsah</div>\n\n");
+        "</head><body %s><div id=\"contentRoot\">\n"
+        "<div class=\"nadpis\">Obsah</div>\n\n", BrokenKitKat());
     TOC();
   } else {
     Prn(&out, "<title>Obsah</title>\n"
-        "</head><body><div id=\"contentRoot\">\n"
-        "<div class=\"nadpis\">Sväté Písmo</div>\n\n");
+        "</head><body %s><div id=\"contentRoot\">\n"
+        "<div class=\"nadpis\">Sväté Písmo</div>\n\n", BrokenKitKat());
     ShortTOC();
   }
   if (zalm) free(zalm);
