@@ -1,3 +1,6 @@
+#ifndef DB_H_
+#define DB_H_
+
 int db_init();
 void db_close();
 char *check_book(const char *s);
@@ -5,7 +8,11 @@ void init_search(char *b);
 void free_search();
 void add_search(int hb, int vb, int he, int ve);
 void do_search();
-int get_result(int *c, char **s);
+
+#define RESULT_FLAG_COMMENT 1
+#define RESULT_FLAG_FALLBACK 2
+int get_result(int *flags, char **s);
+
 int get_citania(int y, int m, int d, char **zt, char **ct);
 void get_prev(char *b, int h, char **ob, int *oh); 
 void get_next(char *b, int h, char **ob, int *oh);
@@ -23,3 +30,5 @@ int get_uvod_pre_knihu(const char* b);
 #define TRANSLATION_SSV 1
 #define TRANSLATION_NVG 2
 void set_translation(int translation);
+
+#endif

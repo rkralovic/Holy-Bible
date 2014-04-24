@@ -13,6 +13,7 @@
 #include "db_bin.h"
 
 #define MAX_RES 65536
+#define INTERNAL_FLAG_FALLBACK (1<<30)
 
 static void *base;
 void *db;
@@ -22,7 +23,7 @@ int active_translation = TRANSLATION_SSV;
 static const struct header *hdr;
 static const struct kniha *knh;
 
-#define STR(x) ((char *)(base+x))
+#define STR(x) ((char *)(base+(x & (~INTERNAL_FLAG_FALLBACK))))
 
 static char *Normalize(const char *s) {
   static struct conv {
@@ -165,14 +166,14 @@ char *check_book(const char *s) {
 int book;
 int n,m;
 struct res_t {
-  int comment, id, t;
+  int flags, id, t;
 } res[MAX_RES];
 
 int cmp_res(struct res_t *a, struct res_t *b) {
-  if (a->id<b->id) return -1;
-  if (a->id>b->id) return 1;
-  if (a->comment>b->comment) return 1;
-  if (a->comment<b->comment) return -1;
+  if (a->id < b->id) return -1;
+  if (a->id > b->id) return 1;
+  if (a->flags & RESULT_FLAG_COMMENT > b->flags & RESULT_FLAG_COMMENT) return 1;
+  if (a->flags & RESULT_FLAG_COMMENT < b->flags & RESULT_FLAG_COMMENT) return -1;
   return 0;
 }
 
@@ -209,7 +210,8 @@ static int get_id(int comment, int id, int e) {
 static int get_trans(const struct text* txt) {
   if (active_translation == TRANSLATION_NVG) {
     if (strlen(STR(txt->t_nvg)) == 0) {
-      return txt->t;  // no neovulgate text, fall back to default
+      // no neovulgate text, fall back to default
+      return txt->t | INTERNAL_FLAG_FALLBACK;
     }
     return txt->t_nvg;
   } else {
@@ -249,9 +251,10 @@ void add_search(int hb, int vb, int he, int ve) {
       }
       while (r<ni && I[r].b <= e) {
         if (I[r].e >= b) {
-          res[n].comment=I[r].comment;
-          res[n].id=get_id(I[r].comment, I[r].id, I[r].e);
-          res[n].t=get_t(I[r].comment, I[r].id);
+          res[n].flags = 0;
+          if (I[r].comment) res[n].flags |= RESULT_FLAG_COMMENT;
+          res[n].id = get_id(I[r].comment, I[r].id, I[r].e);
+          res[n].t = get_t(I[r].comment, I[r].id);
           n++;
         }
         r++;
@@ -263,7 +266,8 @@ void add_search(int hb, int vb, int he, int ve) {
   I = (struct item *)(base+hdr->item[TABLES-1]);
   for (i=0; i<hdr->n_item[TABLES-1]; i++) {
     if (I[i].b <=e && I[i].e >=b) {
-      res[n].comment=I[i].comment;
+      res[n].flags = 0;
+      if (I[i].comment) res[n].flags |= RESULT_FLAG_COMMENT;
       res[n].id=get_id(I[i].comment, I[i].id, I[i].e);
       res[n].t=get_t(I[i].comment, I[i].id);
       n++;
@@ -276,18 +280,19 @@ void do_search() {
   qsort(res, n, sizeof(struct res_t), (int (*)(const void*, const void*))cmp_res);
 }
 
-int get_result_id(int *c, char **s, int *id) {
-  while (m<n && res[m].id==res[m+1].id && res[m].comment==res[m+1].comment) m++;
+int get_result_id(int *flags, char **s, int *id) {
+  while (m<n && res[m].id==res[m+1].id && res[m].flags == res[m+1].flags) m++;
   if (m>=n) return 0;
-  *c = res[m].comment;
+  *flags = res[m].flags;
+  if (res[m].t & INTERNAL_FLAG_FALLBACK) *flags |= RESULT_FLAG_FALLBACK;
   *s = STR(res[m].t);
   if (id) *id = res[m].id;
   m++;
   return 1;
 }
 
-int get_result(int *c, char **s) {
-  return get_result_id(c, s, NULL);
+int get_result(int *flags, char **s) {
+  return get_result_id(flags, s, NULL);
 }
 
 static int cmp_date(int y1, int m1, int d1, int y2, int m2, int d2) {

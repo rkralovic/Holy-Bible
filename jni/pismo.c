@@ -27,7 +27,7 @@ struct kap {
 
 void Print(struct casti *_c) {
   char *k, *s;
-  int vb, ve, hb, he, comment;
+  int vb, ve, hb, he, flags;
   struct casti *c;
 
   //nepekne: spoliehame sa, ze vsetko je z jednej knihy
@@ -79,9 +79,13 @@ void Print(struct casti *_c) {
 
   do_search();
 
-  while (get_result(&comment, &s)) {
-    if (!comment) {
-      Prn(&out, "%s\n", s);
+  while (get_result(&flags, &s)) {
+    if (!(flags & RESULT_FLAG_COMMENT)) {
+      if (flags & RESULT_FLAG_FALLBACK) {
+        Prn(&out, "<span class=\"fallback\">%s</span>\n", s);
+      } else {
+        Prn(&out, "%s\n", s);
+      }
     } else {
       Prn(&out, "<span id=\"e%df\" ", html_id);
       Prn(&out, "onclick=\"ToggleComment('e%d')\" ", html_id);

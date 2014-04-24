@@ -6,6 +6,7 @@
 #include <time.h>
 #include <ctype.h>
 #include "common.h"
+#include "db.h"
 
 #define DBUSER ""  // use current user
 #define DBPASS ""
@@ -94,10 +95,14 @@ void do_search() {
   free(q);
 }
 
-int get_result(int *c, char **s) {
+int get_result(int *flags, char **s) {
   MYSQL_ROW row;
   if (!(row = mysql_fetch_row(result))) return 0;
-  *c = !strcmp(row[0],"2");
+  if (!strcmp(row[0], "2")) {
+    *flags = RESULT_FLAG_COMMENT;
+  } else {
+    *flags = 0;
+  }
   *s = row[2];
   return 1;
 }
