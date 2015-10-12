@@ -380,11 +380,11 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   }
 
   InitBuf(&out); Rst(&out);
-  Prn(&out, "<!DOCTYPE html>\n");
+//  Prn(&out, "<!DOCTYPE html>\n");
   Prn(&out, "<html><head>\n"
 //      "<link rel=\"stylesheet\" href=\"breviar.css\">\n"
       "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n"
-//      "<meta name=\"viewport\" content=\"width=100%; initial-scale=1; maximum-scale=1; minimum-scale=1; user-scalable=no;\" />"
+      "<meta name=\"viewport\" content=\"width=device-width, user-scalable=yes, initial-scale=1.0\" />"
       );
 
 #ifdef NOANDROID
@@ -585,10 +585,10 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   Prn(&out, "<p>\n"
       "<input type=\"text\" id=\"searchstring\">\n"
       "<button onClick=\"submitsearch()\">Hľadaj</button>\n");
-  Prn(&out, "<p>\n"
-      "<a href=\"pismo.cgi?obsah=long\">Obsah</a>\n");
+  Prn(&out, "</div><div id=\"scaler\">\n"
+      "<a href=\"pismo.cgi?obsah=long\">Obsah</a></div>\n");
     
-  Prn(&out, "</div></body></html>\n");
+  Prn(&out, "</body></html>\n");
 
   FreeBuf(&kontext);
   db_close();

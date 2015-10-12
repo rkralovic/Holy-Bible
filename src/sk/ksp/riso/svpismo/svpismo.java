@@ -94,6 +94,8 @@ public class svpismo extends Activity {
 
         wv = (WebView)findViewById(R.id.wv);
         wv.getSettings().setBuiltInZoomControls(true);
+        wv.getSettings().setSupportZoom(true);
+        wv.getSettings().setUseWideViewPort(false);
         wv.setInitialScale(scale);
 
         ((Button)findViewById(R.id.pgupBtn)).setOnClickListener(new View.OnClickListener() {
@@ -182,8 +184,10 @@ public class svpismo extends Activity {
                   public void run() {
                     try {
                       final_view.evaluateJavascript(
-                          "document.getElementById('contentRoot').style.width = window.innerWidth;",
+                          "document.getElementById('contentRoot').style.width = 0.95 * window.innerWidth;",
                           null);
+                      final_view.evaluateJavascript("document.getElementById('scaler').style.width = window.innerWidth * 1.5;", null);
+                      Log.v("svpismo", "Rescaled");
                     } catch (java.lang.IllegalStateException e) {
                       Log.v("svpismo", "Cannot call evaluateJavascript. Cyanogenmod weirdness?");
                     }
