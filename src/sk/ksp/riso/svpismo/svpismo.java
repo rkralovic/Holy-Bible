@@ -41,6 +41,11 @@ public class svpismo extends Activity {
 
     PowerManager.WakeLock lock;
 
+    boolean is_broken_kitkat() {
+      if (Build.VERSION.SDK_INT >= 19) return true;
+      return false;
+    }
+
     public void load(String url) {
       Log.v("svpismo", "load: " + url);
       if (wv_initialized) {
@@ -50,10 +55,10 @@ public class svpismo extends Activity {
       String cnt;
       if (nightmode) {
         cnt = "data:text/html;charset=UTF-8," +
-               process(db, db_len, css_inv, css_inv_len, url, comments);
+               process(db, db_len, css_inv, css_inv_len, url, comments, is_broken_kitkat());
       } else {
         cnt = "data:text/html;charset=UTF-8," +
-              process(db, db_len, css, css_len, url, comments);
+              process(db, db_len, css, css_len, url, comments, is_broken_kitkat());
       }
       wv.loadUrl(cnt);
       wv.setInitialScale(scale);
@@ -344,7 +349,7 @@ public class svpismo extends Activity {
     }
 
     public native String process(ByteBuffer db, long db_len, ByteBuffer css,
-        long css_len, String querystring, boolean comments);
+        long css_len, String querystring, boolean comments, boolean broken_kitkat);
 
     public native void setTranslationSsv();
     public native void setTranslationNvg();

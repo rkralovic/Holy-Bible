@@ -15,6 +15,7 @@ char *zalm, *aleluja;
 int kalendar;
 int html_id;
 int comments = 1;
+int broken_kitkat = 0;
 int uvod_kniha = -1;
 
 struct strbuf kontext, out;
@@ -306,7 +307,7 @@ void ShortTOC() {
 }
 
 const char* BrokenKitKat() {
-  return "onload=\"InitLinksForBrokenKitKat()\"";
+  return broken_kitkat ? "onload=\"InitLinksForBrokenKitKat()\"" : "";
 }
 
 void CommonMain(const char* qstr, const char* css, int css_len) {
@@ -606,7 +607,7 @@ int main() {
   return 0;
 }
 #else
-jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring, jboolean _comments) {
+jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobject _db, jlong _dblen, jobject _css, jlong css_len, jstring querystring, jboolean _comments, jboolean _broken_kitkat) {
   jstring jout;
   const char *qstr;
 
@@ -614,6 +615,7 @@ jstring Java_sk_ksp_riso_svpismo_svpismo_process(JNIEnv* env, jobject thiz, jobj
   db = (*env)->GetDirectBufferAddress(env,_db);
   if (db==NULL) return (*env)->NewStringUTF(env, "");
   comments = _comments;
+  broken_kitkat = _broken_kitkat;
   qstr = (*env)->GetStringUTFChars(env, querystring, NULL);
   __android_log_print(ANDROID_LOG_INFO, "svpismo", "qstr = %s\n", qstr);
 
