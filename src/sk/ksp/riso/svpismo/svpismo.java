@@ -188,10 +188,13 @@ public class svpismo extends Activity {
                   @Override
                   public void run() {
                     try {
+                      double w = final_view.getWidth() * 100.0 / parent.scale;
                       final_view.evaluateJavascript(
-                          "document.getElementById('contentRoot').style.width = 0.95 * window.innerWidth;",
+                          "document.getElementById('contentRoot').style.width = " +
+                          (int)(0.95 * w) + ";",
                           null);
-                      final_view.evaluateJavascript("document.getElementById('scaler').style.width = window.innerWidth * 1.5;", null);
+                      final_view.evaluateJavascript("document.getElementById('scaler').style.width = " +
+                          (int)(1.5 * w) + ";", null);
                       Log.v("svpismo", "Rescaled");
                     } catch (java.lang.IllegalStateException e) {
                       Log.v("svpismo", "Cannot call evaluateJavascript. Cyanogenmod weirdness?");
