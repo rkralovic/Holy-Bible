@@ -31,9 +31,9 @@ char* duptag(char *s) {
   if (s[0] == '-') s++;
   out = strdup(s);
   int l = strlen(out);
-  if (out[l-1] == '\n') l--;
-  if (out[l-1] == '\r') l--;
-  if (out[l-1] == '}') l--;
+  if (l > 0 && out[l-1] == '\n') l--;
+  if (l > 0 && out[l-1] == '\r') l--;
+  if (l > 0 && out[l-1] == '}') l--;
   out[l] = 0;
   return out;
 }
@@ -50,7 +50,8 @@ IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]o
 \/al\.[^/]*\/  return OR;
 \/kr\.[^/]*\/  return OR;
 \|        return OR;
-:[^\r\n;]*\r?\n?      yylval.id = duptag(yytext); return DESC;
+\:[^\r\n;]*{ALPHA}[^\r\n;]*\r?\n?      yylval.id = duptag(yytext); return DESC;
+\:        return COMMA;  // V anglictine sa pouziva : namiesto ciarky, ludia na to mozu byt zvyknuti
 \{-[^}]*\}\r?\n?     yylval.id = duptag(yytext); return TAG_MINOR;
 \{[^-][^}]*\}\r?\n?  yylval.id = duptag(yytext); return TAG_MAJOR;
 \/[^/]*\/  // skip comments // strncpy(yylval.id, yytext, sizeof(yylval.id)); return COMMENT;

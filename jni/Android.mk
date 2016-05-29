@@ -9,7 +9,7 @@ $(LOCAL_PATH)/scanner.c: $(LOCAL_PATH)/scanner.l
 $(LOCAL_PATH)/parser.tab.c: $(LOCAL_PATH)/parser.tab.h
 
 $(LOCAL_PATH)/parser.tab.h: $(LOCAL_PATH)/parser.y
-	cd `dirname $^`; bison -v -d $<
+	cd `dirname $^`; bison -v -d `basename $<`
 
 $(LOCAL_PATH)/pismo.c: $(LOCAL_PATH)/parser.tab.h
 
