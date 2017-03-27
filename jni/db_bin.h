@@ -47,7 +47,7 @@ struct kalendar {
   int32_t zalm, text;
 };
 
-extern void *db;
+extern FILE *db;
 extern int db_len;
 
 // Lowlevel access

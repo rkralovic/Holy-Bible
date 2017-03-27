@@ -15,7 +15,7 @@
 #define MAX_RES 65536
 
 static void *base;
-void *db;
+FILE *db;
 int db_len;
 int active_translation = TRANSLATION_SSV;
 
