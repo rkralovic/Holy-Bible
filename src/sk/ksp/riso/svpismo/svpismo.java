@@ -103,17 +103,27 @@ public class svpismo extends Activity {
         wv.getSettings().setUseWideViewPort(false);
         wv.setInitialScale(scale);
 
+        final svpismo parent = this;
+
         ((Button)findViewById(R.id.pgupBtn)).setOnClickListener(new View.OnClickListener() {
           public void onClick(View v) {
             wv.pageUp(false);
           }
         });
    
+        /*
         ((Button)findViewById(R.id.forwardBtn)).setOnClickListener(new View.OnClickListener() {
           public void onClick(View v) {
             wv.goForward();
           }
         });
+        */
+        ((Button)findViewById(R.id.menuBtn)).setOnClickListener(new View.OnClickListener() {
+          public void onClick(View v) {
+            parent.openOptionsMenu();
+          }
+        });
+
    
         ((Button)findViewById(R.id.downBtn)).setOnClickListener(new View.OnClickListener() {
           public void onClick(View v) {
