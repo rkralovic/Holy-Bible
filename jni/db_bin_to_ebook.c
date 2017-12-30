@@ -133,7 +133,6 @@ int main() {
   db_init();
   printf("<!DOCTYPE html>\n");
   printf("<html><head>\n");
-  printf("<link rel=\"stylesheet\" href=\"breviar.css\">\n");
   printf("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n");
   printf("</head><body>\n");
   /*
