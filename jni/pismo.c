@@ -320,7 +320,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   char buf[1024];
   char *tmp;
 
-  time_t t;
+  // time_t t;
   // struct tm *tt;
 
   aleluja = zalm = NULL;

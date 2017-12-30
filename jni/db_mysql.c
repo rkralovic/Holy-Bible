@@ -33,7 +33,7 @@ void db_close() {
   mysql_close(conn);
 }
 
-char *check_book(char *s) {
+char *check_book(const char *s) {
   char buf[1024];
   char *se,*out;
   MYSQL_RES *result;

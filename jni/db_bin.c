@@ -172,8 +172,8 @@ struct res_t {
 int cmp_res(struct res_t *a, struct res_t *b) {
   if (a->id < b->id) return -1;
   if (a->id > b->id) return 1;
-  if (a->flags & RESULT_FLAG_COMMENT > b->flags & RESULT_FLAG_COMMENT) return 1;
-  if (a->flags & RESULT_FLAG_COMMENT < b->flags & RESULT_FLAG_COMMENT) return -1;
+  if ((a->flags & RESULT_FLAG_COMMENT) > (b->flags & RESULT_FLAG_COMMENT)) return 1;
+  if ((a->flags & RESULT_FLAG_COMMENT) < (b->flags & RESULT_FLAG_COMMENT)) return -1;
   return 0;
 }
 
