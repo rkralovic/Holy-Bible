@@ -25,4 +25,7 @@
     <string name="toc_text">Obsah</string>
     <string name="translation_ssv">Preklad SSV</string>
     <string name="translation_nvg">Preklad NVg</string>
+
+    <string name="navigation_drawer_open">Otvor menu</string>
+    <string name="navigation_drawer_close">Zatvor menu</string>
 </resources>

@@ -3,3 +3,6 @@
 /libs
 /obj
 keystore.properties
+build
+.gradle
+.externalNativeBuild

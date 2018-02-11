@@ -1,32 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/toc" android:title="@string/toc_text"></item>
+  <group android:id="@+id/group_settings">
+    <item android:id="@+id/toc"
+          android:title="@string/toc_text"
+    />
+    <!--     android:icon="TODO" //-->
 
     <item android:id="@+id/comments_toggle"
-        android:title="Zobraziť/skryť komentáre">
-    </item>
+          android:title="Zobraziť/skryť komentáre"
+          app:actionLayout="@layout/widget_switch"
+    />
 
     <item android:id="@+id/nightmode_toggle"
-        android:title="Nočný režim">
-    </item>
+          android:title="Nočný režim"
+          app:actionLayout="@layout/widget_switch"
+    />
 
     <item android:id="@+id/fullscreen_toggle"
-        android:title="Celá obrazovka">
-    </item>
+          android:title="Celá obrazovka"
+          app:actionLayout="@layout/widget_switch"
+    />
 
     <item android:id="@+id/bookmarks"
-        android:title="Záložky">
-    </item>
+          android:title="Záložky"
+    />
 
     <item android:id="@+id/screenlock_toggle"
-        android:title="Zhasínať">
-    </item>
+          android:title="Nezhasínať"
+          app:actionLayout="@layout/widget_switch"
+    />
 
     <item android:id="@+id/translation"
-        android:title="Preklad">
-    </item>
+          android:title="Preklad"
+    />
+  </group>
 
 </menu>
 

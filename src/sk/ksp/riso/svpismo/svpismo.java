@@ -1,31 +1,44 @@
 package sk.ksp.riso.svpismo;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.res.*;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.content.res.*;
 import android.os.PowerManager;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.Button;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.CompoundButton;
 
-import sk.ksp.riso.svpismo.JSInterface;
-import sk.ksp.riso.svpismo.Bookmarks;
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
-import android.content.Intent;
-import android.content.SharedPreferences;
 
-public class svpismo extends Activity {
+import sk.ksp.riso.svpismo.JSInterface;
+import sk.ksp.riso.svpismo.Bookmarks;
+
+public class svpismo extends AppCompatActivity
+                     implements GestureDetector.OnDoubleTapListener,
+                                NavigationView.OnNavigationItemSelectedListener {
     static final String TAG = "svpismo";
     static final String prefname = "SvPismoPrefs";
     MappedByteBuffer db, css, css_inv;
@@ -74,175 +87,239 @@ public class svpismo extends Activity {
       wv.goForward();
     }
 
+    DrawerLayout drawer;
+    NavigationView navigationView = null;
+    Toolbar toolbar = null;
+
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
+    public void onCreate(Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
 
-        final svpismo myself = this;
+      final svpismo myself = this;
 
-        lock = ((PowerManager)getSystemService(POWER_SERVICE))
-                   .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "spevnik");
+      lock = ((PowerManager)getSystemService(POWER_SERVICE))
+                 .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "spevnik");
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.svpismo);
+      requestWindowFeature(Window.FEATURE_NO_TITLE);
+      setContentView(R.layout.svpismo);
 
-        SharedPreferences settings = getSharedPreferences(prefname, 0);
-        scale = settings.getInt("scale", 100);
-        comments = settings.getBoolean("comments", true);
-        nightmode = settings.getBoolean("nightmode", false);
-        fullscreen = settings.getBoolean("fullscreen", false);
-        screenlock = settings.getBoolean("screenlock", true);
-        translation_nvg = settings.getBoolean("translation_nvg", false);
+      toolbar = (Toolbar) findViewById(R.id.svpismo_toolbar);
+      setSupportActionBar(toolbar);
+      getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+      getSupportActionBar().setTitle(getString(R.string.app_name));
+
+      navigationView = (NavigationView) findViewById(R.id.navigation);
+      navigationView.setNavigationItemSelectedListener(this);
+
+      Menu menu = navigationView.getMenu();
+      try {
+        ((CompoundButton)MenuItemCompat.getActionView(menu.findItem(R.id.nightmode_toggle)))
+            .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override public void onCheckedChanged(CompoundButton button,
+                                                           boolean isChecked) {
+                      if (isChecked == nightmode) {
+                        return;
+                      }
+                      toggleNightMode();
+                    }
+                });
+
+        /*
+        ((CompoundButton)MenuItemCompat.getActionView(menu.findItem(R.id.only_non_bold_font_toggle)))
+            .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override public void onCheckedChanged(CompoundButton button,
+                                                           boolean isChecked) {
+                      if (isChecked == !(new UrlOptions(S.getOpts()).isOnlyNonBoldFont())) {
+                        return;
+                      }
+                      toggleOnlyNonBoldFont();
+                      updateMenu();
+                    }
+                });
+
+        ((CompoundButton)MenuItemCompat.getActionView(menu.findItem(R.id.fullscreen_toggle)))
+            .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override public void onCheckedChanged(CompoundButton button,
+                                                           boolean isChecked) {
+                      if (isChecked == fullscreen) {
+                        return;
+                      }
+                      toggleFullscreen();
+                      updateMenu();
+                    }
+                });
+        */
+
+      } catch (java.lang.NullPointerException e) {
+        Log.v("breviar", "Cannot setup navigation view!");
+      }
+
+      drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+      ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(
+          this,  drawer, toolbar,
+          R.string.navigation_drawer_open, R.string.navigation_drawer_close
+      );
+      drawer.setDrawerListener(drawerToggle);
+      getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+      getSupportActionBar().setHomeButtonEnabled(true);
+      drawerToggle.syncState();
+
+      SharedPreferences settings = getSharedPreferences(prefname, 0);
+      scale = settings.getInt("scale", 100);
+      comments = settings.getBoolean("comments", true);
+      nightmode = settings.getBoolean("nightmode", false);
+      fullscreen = settings.getBoolean("fullscreen", false);
+      screenlock = settings.getBoolean("screenlock", true);
+      translation_nvg = settings.getBoolean("translation_nvg", false);
 //        Log.v("svpismo", "init with scale " + scale);
 
-        wv = (WebView)findViewById(R.id.wv);
-        wv.getSettings().setBuiltInZoomControls(true);
-        wv.getSettings().setSupportZoom(true);
-        wv.getSettings().setUseWideViewPort(false);
-        wv.setInitialScale(scale);
+      wv = (WebView)findViewById(R.id.wv);
+      wv.getSettings().setBuiltInZoomControls(true);
+      wv.getSettings().setSupportZoom(true);
+      wv.getSettings().setUseWideViewPort(false);
+      wv.setInitialScale(scale);
 
-        final svpismo parent = this;
+      final svpismo parent = this;
 
-        ((Button)findViewById(R.id.pgupBtn)).setOnClickListener(new View.OnClickListener() {
-          public void onClick(View v) {
-            wv.pageUp(false);
-          }
-        });
-   
-        /*
-        ((Button)findViewById(R.id.forwardBtn)).setOnClickListener(new View.OnClickListener() {
-          public void onClick(View v) {
-            wv.goForward();
-          }
-        });
-        */
-        ((Button)findViewById(R.id.menuBtn)).setOnClickListener(new View.OnClickListener() {
-          public void onClick(View v) {
-            parent.openOptionsMenu();
-          }
-        });
+      ((Button)findViewById(R.id.pgupBtn)).setOnClickListener(new View.OnClickListener() {
+        public void onClick(View v) {
+          wv.pageUp(false);
+        }
+      });
+ 
+      /*
+      ((Button)findViewById(R.id.forwardBtn)).setOnClickListener(new View.OnClickListener() {
+        public void onClick(View v) {
+          wv.goForward();
+        }
+      });
+      */
+      ((Button)findViewById(R.id.menuBtn)).setOnClickListener(new View.OnClickListener() {
+        public void onClick(View v) {
+          parent.openOptionsMenu();
+        }
+      });
 
-   
-        ((Button)findViewById(R.id.downBtn)).setOnClickListener(new View.OnClickListener() {
-          public void onClick(View v) {
-            wv.pageDown(true);
-          }
-        });
-   
-        ((Button)findViewById(R.id.pgdnBtn)).setOnClickListener(new View.OnClickListener() {
-          public void onClick(View v) {
-            wv.pageDown(false);
-          }
-        });
+ 
+      ((Button)findViewById(R.id.downBtn)).setOnClickListener(new View.OnClickListener() {
+        public void onClick(View v) {
+          wv.pageDown(true);
+        }
+      });
+ 
+      ((Button)findViewById(R.id.pgdnBtn)).setOnClickListener(new View.OnClickListener() {
+        public void onClick(View v) {
+          wv.pageDown(false);
+        }
+      });
 
-        try {
-          {
-            AssetFileDescriptor dbf = getAssets().openFd("pismo.bin");
-            FileInputStream fis = dbf.createInputStream();
-            FileChannel channel = fis.getChannel();
-            db = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
-            db_len = dbf.getLength();
+      try {
+        {
+          AssetFileDescriptor dbf = getAssets().openFd("pismo.bin");
+          FileInputStream fis = dbf.createInputStream();
+          FileChannel channel = fis.getChannel();
+          db = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
+          db_len = dbf.getLength();
+        }
+
+        {
+          AssetFileDescriptor dbf = getAssets().openFd("breviar.css");
+          FileChannel channel = dbf.createInputStream().getChannel();
+          css = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
+          css_len = dbf.getLength();
+        }
+
+        {
+          AssetFileDescriptor dbf = getAssets().openFd("breviar-invert.css");
+          FileChannel channel = dbf.createInputStream().getChannel();
+          css_inv = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
+          css_inv_len = dbf.getLength();
+        }
+
+        Intent I = getIntent();
+        if (wv.restoreState(savedInstanceState) == null) {
+          if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
+            if (I.hasExtra("nightmode")) {
+              nightmode = I.getBooleanExtra("nightmode", false);
+              syncPreferences();
+            }
+            load("pismo.cgi?" + I.getData().getQuery());
+          } else {
+            load("pismo.cgi");
+          }
+        }
+
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.addJavascriptInterface(new JSInterface(this), "bridge");
+
+        wv.setWebViewClient( new WebViewClient() {
+          svpismo parent;
+          boolean scaleChangedRunning = false;
+          { parent = myself; }
+          public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            parent.load(url);
+            return true;
           }
 
-          {
-            AssetFileDescriptor dbf = getAssets().openFd("breviar.css");
-            FileChannel channel = dbf.createInputStream().getChannel();
-            css = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
-            css_len = dbf.getLength();
-          }
-
-          {
-            AssetFileDescriptor dbf = getAssets().openFd("breviar-invert.css");
-            FileChannel channel = dbf.createInputStream().getChannel();
-            css_inv = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
-            css_inv_len = dbf.getLength();
-          }
-
-          Intent I = getIntent();
-          if (wv.restoreState(savedInstanceState) == null) {
-            if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
-              if (I.hasExtra("nightmode")) {
-                nightmode = I.getBooleanExtra("nightmode", false);
-                syncPreferences();
-              }
-              load("pismo.cgi?" + I.getData().getQuery());
+          @Override
+          public void onScaleChanged(WebView view, float oldSc, float newSc) {
+            parent.scale = (int)(newSc*100);
+            if (Build.VERSION.SDK_INT < 19) {  // pre-KitKat
+              view.setInitialScale(parent.scale);
             } else {
-              load("pismo.cgi");
+              if (scaleChangedRunning) return;
+              scaleChangedRunning = true;
+              final WebView final_view = view;
+              view.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                  try {
+                    double w = final_view.getWidth() * 100.0 / parent.scale;
+                    final_view.evaluateJavascript(
+                        "document.getElementById('contentRoot').style.width = " +
+                        (int)(0.95 * w) + ";",
+                        null);
+                    final_view.evaluateJavascript("document.getElementById('scaler').style.width = " +
+                        (int)(1.5 * w) + ";", null);
+                    Log.v("svpismo", "Rescaled");
+                  } catch (java.lang.IllegalStateException e) {
+                    Log.v("svpismo", "Cannot call evaluateJavascript. Cyanogenmod weirdness?");
+                  }
+                  scaleChangedRunning = false;
+                }
+              }, 100);
             }
+//              Log.v("svpismo", "onScaleChanged " + parent.scale);
           }
 
-          wv.getSettings().setJavaScriptEnabled(true);
-          wv.addJavascriptInterface(new JSInterface(this), "bridge");
-
-          wv.setWebViewClient( new WebViewClient() {
-            svpismo parent;
-            boolean scaleChangedRunning = false;
-            { parent = myself; }
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-              parent.load(url);
-              return true;
-            }
-
-            @Override
-            public void onScaleChanged(WebView view, float oldSc, float newSc) {
-              parent.scale = (int)(newSc*100);
-              if (Build.VERSION.SDK_INT < 19) {  // pre-KitKat
-                view.setInitialScale(parent.scale);
-              } else {
-                if (scaleChangedRunning) return;
-                scaleChangedRunning = true;
-                final WebView final_view = view;
-                view.postDelayed(new Runnable() {
-                  @Override
-                  public void run() {
-                    try {
-                      double w = final_view.getWidth() * 100.0 / parent.scale;
-                      final_view.evaluateJavascript(
-                          "document.getElementById('contentRoot').style.width = " +
-                          (int)(0.95 * w) + ";",
-                          null);
-                      final_view.evaluateJavascript("document.getElementById('scaler').style.width = " +
-                          (int)(1.5 * w) + ";", null);
-                      Log.v("svpismo", "Rescaled");
-                    } catch (java.lang.IllegalStateException e) {
-                      Log.v("svpismo", "Cannot call evaluateJavascript. Cyanogenmod weirdness?");
-                    }
-                    scaleChangedRunning = false;
-                  }
-                }, 100);
-              }
-//              Log.v("svpismo", "onScaleChanged " + parent.scale);
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-              super.onPageFinished(view, url);
-              // Ugly hack. But we have no reliable notification when is webview scrollable.
-              final WebView wv = view;
-              view.postDelayed(new Runnable() {
-                public void run() {
-                  if (parent.scroll_to >= 0) {
-                    int Y = (int)(parent.scroll_to*wv.getContentHeight());
-                    wv.scrollTo(0, Y);
-                  }
-                  parent.scroll_to = -1;
+          @Override
+          public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            // Ugly hack. But we have no reliable notification when is webview scrollable.
+            final WebView wv = view;
+            view.postDelayed(new Runnable() {
+              public void run() {
+                if (parent.scroll_to >= 0) {
+                  int Y = (int)(parent.scroll_to*wv.getContentHeight());
+                  wv.scrollTo(0, Y);
                 }
-              }, 400);
-            }
+                parent.scroll_to = -1;
+              }
+            }, 400);
+          }
 
-          });
+        });
 
-          updateFullscreen();
-        } catch (IOException e) {
-          wv.loadData("Some problem.", "text/html", "utf-8");
-        }
-        if (translation_nvg) {
-          setTranslationNvg();
-        } else {
-          setTranslationSsv();
-        }
+        updateFullscreen();
+      } catch (IOException e) {
+        wv.loadData("Some problem.", "text/html", "utf-8");
+      }
+      if (translation_nvg) {
+        setTranslationNvg();
+      } else {
+        setTranslationSsv();
+      }
     }
 
     protected void onSaveInstanceState(Bundle outState) {
@@ -274,11 +351,63 @@ public class svpismo extends Activity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu( Menu menu ) {
-      // Inflate the currently selected menu XML resource.
-      MenuInflater inflater = getMenuInflater();
-      inflater.inflate( R.menu.menu, menu );
+    public boolean onCreateOptionsMenu(Menu menu) {
+      getMenuInflater().inflate(R.menu.toolbar_menu, menu);
       return true;
+    }
+
+    void updateMenuItemSwitch(MenuItem item, boolean value) {
+      if (item == null) return;
+      CompoundButton s = (CompoundButton)MenuItemCompat.getActionView(item);
+      if (s == null) return;
+      s.setChecked(value);
+    }
+
+    public void updateMenu() {
+      if (navigationView == null) return;
+      Menu menu = navigationView.getMenu();
+      if (menu == null) return;
+
+      MenuItem drawer_item = menu.findItem(R.id.nightmode_toggle);
+//      MenuItem action_item = toolbar.getMenu().findItem(R.id.nightmodeBtn);
+
+      if (nightmode) {
+        updateMenuItemSwitch(drawer_item, true);
+        /*
+        if (action_item != null) {
+          action_item.setTitle(R.string.nightmode_off);
+          action_item.setIcon(R.drawable.ic_wb_sunny_white_24dp);
+        }
+        */
+      } else {
+        updateMenuItemSwitch(drawer_item, false);
+        /*
+        if (action_item != null) {
+          action_item.setTitle(R.string.nightmode_on);
+          action_item.setIcon(R.drawable.ic_brightness_3_white_24dp);
+        }
+        */
+      }
+
+      /*
+      drawer_item = menu.findItem(R.id.only_non_bold_font_toggle);
+      if (drawer_item != null) {
+        updateMenuItemSwitch(drawer_item, !opts.isOnlyNonBoldFont());
+      }
+
+      drawer_item = menu.findItem(R.id.fullscreen_toggle);
+      if (drawer_item != null) {
+        updateMenuItemSwitch(drawer_item, fullscreen);
+      }
+      */
+    }
+
+
+    void toggleNightMode() {
+      nightmode = !nightmode;
+      syncPreferences();
+      load(active_url);
+      updateMenu();
     }
 
     @Override
@@ -288,22 +417,20 @@ public class svpismo extends Activity {
         case R.id.toc:
           load(toc_url);
           return true;
-        case R.id.comments_toggle:
+        case R.id.comments_toggle_toolbar:
           comments = !comments;
           syncPreferences();
           load(active_url);
           return true;
-        case R.id.nightmode_toggle:
-          nightmode = !nightmode;
-          syncPreferences();
-          load(active_url);
+        case R.id.nightmode_toggle_toolbar:
+          toggleNightMode();
           return true;
-        case R.id.fullscreen_toggle:
+        case R.id.fullscreen_toggle_toolbar:
           fullscreen = !fullscreen;
           updateFullscreen();
           syncPreferences();
           return true;
-        case R.id.screenlock_toggle:
+        case R.id.screenlock_toggle_toolbar:
           screenlock = !screenlock;
           if (screenlock) {
             lock.acquire();
@@ -312,7 +439,7 @@ public class svpismo extends Activity {
           }
           syncPreferences();
           return true;
-        case R.id.translation:
+        case R.id.translation_toolbar:
           translation_nvg = !translation_nvg;
           if (translation_nvg) {
             setTranslationNvg();
@@ -322,7 +449,7 @@ public class svpismo extends Activity {
           syncPreferences();
           load(active_url);
           return true;
-        case R.id.bookmarks:
+        case R.id.bookmarks_toolbar:
 	  Intent i = new Intent(this, Bookmarks.class);
 	  i.putExtra("location", active_url); 
 	  i.putExtra("position", wv.getScrollY() / (float)wv.getContentHeight());
@@ -372,36 +499,14 @@ public class svpismo extends Activity {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-      if ((active_url != toc_url) != (menu.findItem(R.id.toc).isVisible())) {
-    	  menu.findItem(R.id.toc).setVisible(active_url != toc_url);
-      };
-      if (comments) {
-        menu.findItem(R.id.comments_toggle).setTitle(R.string.comments_off);
-      } else {
-        menu.findItem(R.id.comments_toggle).setTitle(R.string.comments_on);
+    public boolean onNavigationItemSelected(MenuItem item) {
+      switch (item.getItemId()) {
+        case R.id.nightmode_toggle:
+          toggleNightMode();
+          break;
       }
-      if (nightmode) {
-        menu.findItem(R.id.nightmode_toggle).setTitle(R.string.nightmode_off);
-      } else {
-        menu.findItem(R.id.nightmode_toggle).setTitle(R.string.nightmode_on);
-      }
-      if (fullscreen) {
-        menu.findItem(R.id.fullscreen_toggle).setTitle(R.string.fullscreen_off);
-      } else {
-        menu.findItem(R.id.fullscreen_toggle).setTitle(R.string.fullscreen_on);
-      }
-      if (screenlock) {
-        menu.findItem(R.id.screenlock_toggle).setTitle(R.string.screenlock_off);
-      } else {
-        menu.findItem(R.id.screenlock_toggle).setTitle(R.string.screenlock_on);
-      }
-      if (translation_nvg) {
-        menu.findItem(R.id.translation).setTitle(R.string.translation_ssv);
-      } else {
-        menu.findItem(R.id.translation).setTitle(R.string.translation_nvg);
-      }
-      return super.onPrepareOptionsMenu(menu);
+      drawer.closeDrawer(GravityCompat.START);
+      return true;
     }
 
     @Override
@@ -444,5 +549,23 @@ public class svpismo extends Activity {
       if (screenlock) {
         lock.release();
       }
+    }
+
+    @Override
+    public boolean onDoubleTap(android.view.MotionEvent e) {
+      // TODO
+      // toggleFullscreen();
+      // updateMenu();
+      return true;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(android.view.MotionEvent e) {
+      return false;
+    }
+
+    @Override
+    public boolean onSingleTapConfirmed(android.view.MotionEvent e) {
+      return false;
     }
 }
