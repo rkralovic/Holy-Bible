@@ -90,6 +90,7 @@ public class svpismo extends AppCompatActivity
     DrawerLayout drawer;
     NavigationView navigationView = null;
     Toolbar toolbar = null;
+    GestureDetector tap_gesture_detector;
 
     /** Called when the activity is first created. */
     @Override
@@ -99,7 +100,7 @@ public class svpismo extends AppCompatActivity
       final svpismo myself = this;
 
       lock = ((PowerManager)getSystemService(POWER_SERVICE))
-                 .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "spevnik");
+                 .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "svpismo");
 
       requestWindowFeature(Window.FEATURE_NO_TITLE);
       setContentView(R.layout.svpismo);
@@ -125,16 +126,14 @@ public class svpismo extends AppCompatActivity
                     }
                 });
 
-        /*
-        ((CompoundButton)MenuItemCompat.getActionView(menu.findItem(R.id.only_non_bold_font_toggle)))
+        ((CompoundButton)MenuItemCompat.getActionView(menu.findItem(R.id.comments_toggle)))
             .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override public void onCheckedChanged(CompoundButton button,
                                                            boolean isChecked) {
-                      if (isChecked == !(new UrlOptions(S.getOpts()).isOnlyNonBoldFont())) {
+                      if (isChecked == comments) {
                         return;
                       }
-                      toggleOnlyNonBoldFont();
-                      updateMenu();
+                      toggleComments();
                     }
                 });
 
@@ -146,10 +145,30 @@ public class svpismo extends AppCompatActivity
                         return;
                       }
                       toggleFullscreen();
-                      updateMenu();
                     }
                 });
-        */
+
+        ((CompoundButton)MenuItemCompat.getActionView(menu.findItem(R.id.screenlock_toggle)))
+            .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override public void onCheckedChanged(CompoundButton button,
+                                                           boolean isChecked) {
+                      if (isChecked == screenlock) {
+                        return;
+                      }
+                      toggleScreenlock();
+                    }
+                });
+
+        ((CompoundButton)MenuItemCompat.getActionView(menu.findItem(R.id.translation_toggle)))
+            .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override public void onCheckedChanged(CompoundButton button,
+                                                           boolean isChecked) {
+                      if (isChecked == translation_nvg) {
+                        return;
+                      }
+                      toggleTranslation();
+                    }
+                });
 
       } catch (java.lang.NullPointerException e) {
         Log.v("breviar", "Cannot setup navigation view!");
@@ -175,7 +194,7 @@ public class svpismo extends AppCompatActivity
 //        Log.v("svpismo", "init with scale " + scale);
 
       wv = (WebView)findViewById(R.id.wv);
-      wv.getSettings().setBuiltInZoomControls(true);
+      //wv.getSettings().setBuiltInZoomControls(true);
       wv.getSettings().setSupportZoom(true);
       wv.getSettings().setUseWideViewPort(false);
       wv.setInitialScale(scale);
@@ -236,6 +255,10 @@ public class svpismo extends AppCompatActivity
           css_inv = channel.map(FileChannel.MapMode.READ_ONLY, dbf.getStartOffset(), dbf.getLength());
           css_inv_len = dbf.getLength();
         }
+
+        tap_gesture_detector = new GestureDetector(this,
+                                       new GestureDetector.SimpleOnGestureListener());
+        tap_gesture_detector.setOnDoubleTapListener(this);
 
         Intent I = getIntent();
         if (wv.restoreState(savedInstanceState) == null) {
@@ -320,6 +343,7 @@ public class svpismo extends AppCompatActivity
       } else {
         setTranslationSsv();
       }
+      updateMenu();
     }
 
     protected void onSaveInstanceState(Bundle outState) {
@@ -369,37 +393,93 @@ public class svpismo extends AppCompatActivity
       if (menu == null) return;
 
       MenuItem drawer_item = menu.findItem(R.id.nightmode_toggle);
-//      MenuItem action_item = toolbar.getMenu().findItem(R.id.nightmodeBtn);
+      MenuItem action_item = toolbar.getMenu().findItem(R.id.nightmode_toggle_toolbar);
 
       if (nightmode) {
         updateMenuItemSwitch(drawer_item, true);
-        /*
         if (action_item != null) {
           action_item.setTitle(R.string.nightmode_off);
           action_item.setIcon(R.drawable.ic_wb_sunny_white_24dp);
         }
-        */
       } else {
         updateMenuItemSwitch(drawer_item, false);
-        /*
         if (action_item != null) {
           action_item.setTitle(R.string.nightmode_on);
           action_item.setIcon(R.drawable.ic_brightness_3_white_24dp);
         }
-        */
-      }
-
-      /*
-      drawer_item = menu.findItem(R.id.only_non_bold_font_toggle);
-      if (drawer_item != null) {
-        updateMenuItemSwitch(drawer_item, !opts.isOnlyNonBoldFont());
       }
 
       drawer_item = menu.findItem(R.id.fullscreen_toggle);
-      if (drawer_item != null) {
-        updateMenuItemSwitch(drawer_item, fullscreen);
+      action_item = null;
+      //action_item = toolbar.getMenu().findItem(R.id.fullscreen_toggle_toolbar);
+
+      if (fullscreen) {
+        updateMenuItemSwitch(drawer_item, true);
+        if (action_item != null) {
+          action_item.setTitle(R.string.fullscreen_off);
+          //action_item.setIcon(R.drawable.ic_wb_sunny_white_24dp);
+        }
+      } else {
+        updateMenuItemSwitch(drawer_item, false);
+        if (action_item != null) {
+          action_item.setTitle(R.string.fullscreen_on);
+          //action_item.setIcon(R.drawable.ic_brightness_3_white_24dp);
+        }
       }
-      */
+
+      drawer_item = menu.findItem(R.id.comments_toggle);
+      action_item = null;
+      //action_item = toolbar.getMenu().findItem(R.id.comments_toggle_toolbar);
+
+      if (comments) {
+        updateMenuItemSwitch(drawer_item, true);
+        if (action_item != null) {
+          action_item.setTitle(R.string.comments_off);
+          //action_item.setIcon(R.drawable.ic_wb_sunny_white_24dp);
+        }
+      } else {
+        updateMenuItemSwitch(drawer_item, false);
+        if (action_item != null) {
+          action_item.setTitle(R.string.comments_on);
+          //action_item.setIcon(R.drawable.ic_brightness_3_white_24dp);
+        }
+      }
+
+      drawer_item = menu.findItem(R.id.screenlock_toggle);
+      action_item = null;
+      //action_item = toolbar.getMenu().findItem(R.id.screenlock_toggle_toolbar);
+
+      if (screenlock) {
+        updateMenuItemSwitch(drawer_item, true);
+        if (action_item != null) {
+          action_item.setTitle(R.string.screenlock_off);
+          //action_item.setIcon(R.drawable.ic_wb_sunny_white_24dp);
+        }
+      } else {
+        updateMenuItemSwitch(drawer_item, false);
+        if (action_item != null) {
+          action_item.setTitle(R.string.screenlock_on);
+          //action_item.setIcon(R.drawable.ic_brightness_3_white_24dp);
+        }
+      }
+
+      drawer_item = menu.findItem(R.id.translation_toggle);
+      action_item = null;
+      //action_item = toolbar.getMenu().findItem(R.id.translation_toggle_toolbar);
+
+      if (translation_nvg) {
+        updateMenuItemSwitch(drawer_item, true);
+        if (action_item != null) {
+          action_item.setTitle(R.string.translation_ssv);
+          //action_item.setIcon(R.drawable.ic_wb_sunny_white_24dp);
+        }
+      } else {
+        updateMenuItemSwitch(drawer_item, false);
+        if (action_item != null) {
+          action_item.setTitle(R.string.translation_nvg);
+          //action_item.setIcon(R.drawable.ic_brightness_3_white_24dp);
+        }
+      }
     }
 
 
@@ -410,44 +490,66 @@ public class svpismo extends AppCompatActivity
       updateMenu();
     }
 
+    void toggleComments() {
+      comments = !comments;
+      syncPreferences();
+      load(active_url);
+      updateMenu();
+    }
+
+    void toggleFullscreen() {
+      fullscreen = !fullscreen;
+      updateFullscreen();
+      syncPreferences();
+      updateMenu();
+    }
+
+    void toggleScreenlock() {
+      screenlock = !screenlock;
+      if (screenlock) {
+        lock.acquire();
+      } else {
+        lock.release();
+      }
+      syncPreferences();
+      syncPreferences();
+      updateMenu();
+    }
+
+    void toggleTranslation() {
+      translation_nvg = !translation_nvg;
+      if (translation_nvg) {
+        setTranslationNvg();
+      } else {
+        setTranslationSsv();
+      }
+      syncPreferences();
+      load(active_url);
+      updateMenu();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
       // Handle item selection
       switch (item.getItemId()) {
-        case R.id.toc:
-          load(toc_url);
-          return true;
-        case R.id.comments_toggle_toolbar:
-          comments = !comments;
-          syncPreferences();
-          load(active_url);
+        case R.id.toc_toolbar:
+          load("pismo.cgi");
           return true;
         case R.id.nightmode_toggle_toolbar:
           toggleNightMode();
           return true;
+          /*
+        case R.id.comments_toggle_toolbar:
+          toggleComments();
+          return true;
         case R.id.fullscreen_toggle_toolbar:
-          fullscreen = !fullscreen;
-          updateFullscreen();
-          syncPreferences();
+          toggleFullscreen();
           return true;
         case R.id.screenlock_toggle_toolbar:
-          screenlock = !screenlock;
-          if (screenlock) {
-            lock.acquire();
-          } else {
-            lock.release();
-          }
-          syncPreferences();
+          toggleScreenlock();
           return true;
-        case R.id.translation_toolbar:
-          translation_nvg = !translation_nvg;
-          if (translation_nvg) {
-            setTranslationNvg();
-          } else {
-            setTranslationSsv();
-          }
-          syncPreferences();
-          load(active_url);
+        case R.id.translation_toggle_toolbar:
+          toggleTranslation();
           return true;
         case R.id.bookmarks_toolbar:
 	  Intent i = new Intent(this, Bookmarks.class);
@@ -455,6 +557,7 @@ public class svpismo extends AppCompatActivity
 	  i.putExtra("position", wv.getScrollY() / (float)wv.getContentHeight());
 	  startActivityForResult(i, Bookmarks.BOOKMARKS);
           return true;
+          */
         default:
           return super.onOptionsItemSelected(item);
       }
@@ -501,8 +604,29 @@ public class svpismo extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
       switch (item.getItemId()) {
+        case R.id.toc:
+          load(toc_url);
+          break;
+        case R.id.comments_toggle:
+          toggleComments();
+          break;
         case R.id.nightmode_toggle:
           toggleNightMode();
+          break;
+        case R.id.fullscreen_toggle:
+          toggleFullscreen();
+          break;
+        case R.id.screenlock_toggle:
+          toggleScreenlock();
+          break;
+        case R.id.translation_toggle:
+          toggleTranslation();
+          break;
+        case R.id.bookmarks:
+	  Intent i = new Intent(this, Bookmarks.class);
+	  i.putExtra("location", active_url); 
+	  i.putExtra("position", wv.getScrollY() / (float)wv.getContentHeight());
+	  startActivityForResult(i, Bookmarks.BOOKMARKS);
           break;
       }
       drawer.closeDrawer(GravityCompat.START);
@@ -527,9 +651,11 @@ public class svpismo extends AppCompatActivity
       WindowManager.LayoutParams params = getWindow().getAttributes();
       if (fullscreen) {
         findViewById(R.id.navbar).setVisibility(View.GONE);
+        toolbar.setVisibility(View.GONE);
         params.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
       } else {
         findViewById(R.id.navbar).setVisibility(View.VISIBLE);
+        toolbar.setVisibility(View.VISIBLE);
         params.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
       }
       getWindow().setAttributes(params);
@@ -553,9 +679,8 @@ public class svpismo extends AppCompatActivity
 
     @Override
     public boolean onDoubleTap(android.view.MotionEvent e) {
-      // TODO
-      // toggleFullscreen();
-      // updateMenu();
+      toggleFullscreen();
+      updateMenu();
       return true;
     }
 
@@ -568,4 +693,12 @@ public class svpismo extends AppCompatActivity
     public boolean onSingleTapConfirmed(android.view.MotionEvent e) {
       return false;
     }
+
+    @Override
+    public boolean dispatchTouchEvent(android.view.MotionEvent e) {
+      //scale_gesture_detector.onTouchEvent(e);
+      tap_gesture_detector.onTouchEvent(e);
+      return super.dispatchTouchEvent(e);
+    }
+
 }

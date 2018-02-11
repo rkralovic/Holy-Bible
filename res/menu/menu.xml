@@ -33,8 +33,9 @@
           app:actionLayout="@layout/widget_switch"
     />
 
-    <item android:id="@+id/translation"
+    <item android:id="@+id/translation_toggle"
           android:title="Preklad"
+          app:actionLayout="@layout/widget_switch"
     />
   </group>
 
