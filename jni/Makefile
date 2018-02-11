@@ -1,7 +1,7 @@
 CFLAGS+=-O0 -ggdb -DNOANDROID
 LDFLAGS+=-O0 -ggdb -DNOANDROID
 
-all: pismo pismo.cgi db_bin_gen pismo.mobi
+all: pismo pismo.cgi db_bin_gen pismo.mobi pismo.epub
 
 pismo.cgi: pismo.o parser.tab.o scanner.o common.o db_mysql.o
 	$(CC) $(LDFLAGS) $^ -o $@ -lmysqlclient
@@ -18,6 +18,14 @@ db_bin_to_ebook: db_bin_to_ebook.o db_bin.o parser.tab.o scanner.o common.o
 pismo.mobi: db_bin_to_ebook ebook.css
 	./db_bin_to_ebook >/tmp/pismo.html
 	ebook-convert /tmp/pismo.html ./pismo.mobi \
+          --max-toc-links 500 \
+          --level1-toc '//*[@class="kniha"]|//h:h1' \
+          --level2-toc '//*[@class="kap"]' \
+          --extra-css ./ebook.css
+
+pismo.epub: db_bin_to_ebook ebook.css
+	./db_bin_to_ebook >/tmp/pismo.html
+	ebook-convert /tmp/pismo.html ./pismo.epub \
           --max-toc-links 500 \
           --level1-toc '//*[@class="kniha"]|//h:h1' \
           --level2-toc '//*[@class="kap"]' \
