@@ -16,7 +16,7 @@
 #define INTERNAL_FLAG_FALLBACK (1<<30)
 
 static void *base;
-void *db;
+FILE *db;
 int db_len;
 int active_translation = TRANSLATION_SSV;
 

@@ -306,8 +306,8 @@ void ShortTOC() {
   }
 }
 
-const char* BrokenKitKat() {
-  return broken_kitkat ? "onload=\"InitLinksForBrokenKitKat()\"" : "";
+const char* OnLoad() {
+  return "onload=\"InitLinksForBrokenKitKat(); SetupListeners()\"";
 }
 
 void CommonMain(const char* qstr, const char* css, int css_len) {
@@ -430,6 +430,22 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
       "    return false;\n"
       "  }\n"
       "}\n"
+      "function SetupListeners() {\n"
+      "  document.getElementById(\"zobraz\")\n"
+      "      .addEventListener(\"keyup\", function(event) {\n"
+      "      event.preventDefault();\n"
+      "      if (event.keyCode == 13) {\n"
+      "          document.getElementById(\"gombik_zobraz\").click();\n"
+      "      }\n"
+      "  });\n"
+      "  document.getElementById(\"searchstring\")\n"
+      "      .addEventListener(\"keyup\", function(event) {\n"
+      "      event.preventDefault();\n"
+      "      if (event.keyCode == 13) {\n"
+      "          document.getElementById(\"gombik_hladaj\").click();\n"
+      "      }\n"
+      "  });\n"
+      "}\n"
       "function InitLinksForBrokenKitKat() {\n"
       "  var elements = document.getElementsByTagName('a');\n"
       "  for(var i = 0, len = elements.length; i < len; i++) {\n"
@@ -447,7 +463,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   if (coord && d==-1) {
     Prn(&out, "<title>%s</title>\n"
       "</head><body %s><div id=\"contentRoot\">\n"
-      "<div class=\"nadpis\">%s</div>\n\n", coord, BrokenKitKat(), coord);
+      "<div class=\"nadpis\">%s</div>\n\n", coord, OnLoad(), coord);
     kalendar = 0;
     // workaround bison bug
     if (coord[strlen(coord) - 1] == ';') {
@@ -503,7 +519,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     Prn(&out, "<title>Vyhľadávanie \"%s\"</title>\n"
         "</head><body %s><div id=\"contentRoot\">\n"
         "<div class=\"nadpis\">Vyhľadávanie \"%s\"</div>\n\n",
-        search, BrokenKitKat(), search);
+        search, OnLoad(), search);
 
     fulltext_search(search);
     for (cnt=0; get_fulltext_result(&b, &h, &v, &t); cnt++) {
@@ -537,7 +553,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     Prn(&out, "<title>Čítania na %d.%d.%d</title>\n"
         "</head><body %s><div id=\"contentRoot\">\n"
         "<div class=\"nadpis\">Liturgické čítania na %d.%d.%d</div>\n\n",
-        d,m,y, BrokenKitKat(), d,m,y);
+        d,m,y, OnLoad(), d,m,y);
     scan_string(coord);
     yyparse();
 
@@ -555,7 +571,7 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
     const char* kniha = get_uvod_kniha(uvod);
     Prn(&out, "<title>%s</title>\n"
         "</head><body %s>\n"
-        "<div class=\"nadpis\">%s</div>\n\n%s<p>", kniha, BrokenKitKat(), kniha, get_uvod(uvod));
+        "<div class=\"nadpis\">%s</div>\n\n%s<p>", kniha, OnLoad(), kniha, get_uvod(uvod));
     if (uvod > 0 ) {
       Prn(&out, // "<p>\n"
           "<a href=\"pismo.cgi?uvod=%d\">Dozadu</a>", uvod - 1);
@@ -566,12 +582,12 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
   } else if (obsah) {
     Prn(&out, "<title>Obsah</title>\n"
         "</head><body %s><div id=\"contentRoot\">\n"
-        "<div class=\"nadpis\">Obsah</div>\n\n", BrokenKitKat());
+        "<div class=\"nadpis\">Obsah</div>\n\n", OnLoad());
     TOC();
   } else {
     Prn(&out, "<title>Obsah</title>\n"
         "</head><body %s><div id=\"contentRoot\">\n"
-        "<div class=\"nadpis\">Sväté Písmo</div>\n\n", BrokenKitKat());
+        "<div class=\"nadpis\">Sväté Písmo</div>\n\n", OnLoad());
     ShortTOC();
   }
   if (zalm) free(zalm);
@@ -582,10 +598,10 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
 
   Prn(&out, "<p>\n"
       "<input type=\"text\" id=\"zobraz\">\n"
-      "<button onClick=\"submitcoord()\">Zobraz</button>\n");
+      "<button id=\"gombik_zobraz\" onClick=\"submitcoord()\">Zobraz</button>\n");
   Prn(&out, "<p>\n"
       "<input type=\"text\" id=\"searchstring\">\n"
-      "<button onClick=\"submitsearch()\">Hľadaj</button>\n");
+      "<button id=\"gombik_hladaj\" onClick=\"submitsearch()\">Hľadaj</button>\n");
   Prn(&out, "</div><div id=\"scaler\">\n"
       "<a href=\"pismo.cgi?obsah=long\">Obsah</a></div>\n");
     
