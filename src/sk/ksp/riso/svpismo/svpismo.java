@@ -206,27 +206,27 @@ public class svpismo extends AppCompatActivity
           wv.pageUp(false);
         }
       });
- 
-      /*
+
       ((Button)findViewById(R.id.forwardBtn)).setOnClickListener(new View.OnClickListener() {
         public void onClick(View v) {
           wv.goForward();
         }
       });
-      */
+      /*
       ((Button)findViewById(R.id.menuBtn)).setOnClickListener(new View.OnClickListener() {
         public void onClick(View v) {
           parent.openOptionsMenu();
         }
       });
+      */
 
- 
+
       ((Button)findViewById(R.id.downBtn)).setOnClickListener(new View.OnClickListener() {
         public void onClick(View v) {
           wv.pageDown(true);
         }
       });
- 
+
       ((Button)findViewById(R.id.pgdnBtn)).setOnClickListener(new View.OnClickListener() {
         public void onClick(View v) {
           wv.pageDown(false);
@@ -538,6 +538,12 @@ public class svpismo extends AppCompatActivity
         case R.id.nightmode_toggle_toolbar:
           toggleNightMode();
           return true;
+        case R.id.bookmarks_toolbar:
+	  Intent i = new Intent(this, Bookmarks.class);
+	  i.putExtra("location", active_url);
+	  i.putExtra("position", wv.getScrollY() / (float)wv.getContentHeight());
+	  startActivityForResult(i, Bookmarks.BOOKMARKS);
+          return true;
           /*
         case R.id.comments_toggle_toolbar:
           toggleComments();
@@ -551,17 +557,11 @@ public class svpismo extends AppCompatActivity
         case R.id.translation_toggle_toolbar:
           toggleTranslation();
           return true;
-        case R.id.bookmarks_toolbar:
-	  Intent i = new Intent(this, Bookmarks.class);
-	  i.putExtra("location", active_url); 
-	  i.putExtra("position", wv.getScrollY() / (float)wv.getContentHeight());
-	  startActivityForResult(i, Bookmarks.BOOKMARKS);
-          return true;
           */
         default:
           return super.onOptionsItemSelected(item);
       }
-    }    
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -624,7 +624,7 @@ public class svpismo extends AppCompatActivity
           break;
         case R.id.bookmarks:
 	  Intent i = new Intent(this, Bookmarks.class);
-	  i.putExtra("location", active_url); 
+	  i.putExtra("location", active_url);
 	  i.putExtra("position", wv.getScrollY() / (float)wv.getContentHeight());
 	  startActivityForResult(i, Bookmarks.BOOKMARKS);
           break;
@@ -645,7 +645,7 @@ public class svpismo extends AppCompatActivity
         default:
           super.onActivityResult(requestCode, resultCode, data);
       }
-    }    
+    }
 
     void updateFullscreen() {
       WindowManager.LayoutParams params = getWindow().getAttributes();
