@@ -194,7 +194,8 @@ public class svpismo extends AppCompatActivity
 //        Log.v("svpismo", "init with scale " + scale);
 
       wv = (WebView)findViewById(R.id.wv);
-      //wv.getSettings().setBuiltInZoomControls(true);
+      wv.getSettings().setBuiltInZoomControls(true);
+      wv.getSettings().setDisplayZoomControls(false);
       wv.getSettings().setSupportZoom(true);
       wv.getSettings().setUseWideViewPort(false);
       wv.setInitialScale(scale);
