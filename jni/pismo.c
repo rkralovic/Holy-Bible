@@ -172,6 +172,8 @@ char *StringDecode(char *in) {
 
   for (s=in,i=0; *s; s++,i++) {
     if (s[0]=='%') {
+      if (!s[1]) return NULL;
+      if (!s[2]) return NULL;
       s[1]=toupper(s[1]);
       s[2]=toupper(s[2]);
       if ( !( ( (s[1]>='A')&&(s[1]<='F') ) ||
