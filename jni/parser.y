@@ -47,7 +47,7 @@ static YYSTYPE citaniaMerge(YYSTYPE x0, YYSTYPE x1) { free_citania(x1.citania, 0
 
 %token OR COMMENT REGEXP ID NUM DASH DOT COMMA SEMICOLON ERROR DESC TAG_MINOR TAG_MAJOR
 %token END 0
-%glr-parser
+//%glr-parser
 %destructor { free_casti($$.casti); } suradnice casti;
 %destructor { free_varianty($$.varianty, 1); } varianta citanie;
 %destructor { free_citania($$.citania, 1); } citania;
@@ -57,9 +57,9 @@ static YYSTYPE citaniaMerge(YYSTYPE x0, YYSTYPE x1) { free_citania(x1.citania, 0
 
 all: citania { Process($1.citania); }
 
-citania:  citanie citania { NEW($$, citania, $2.citania); CPY($$.citania->l, $1.varianty); } %dprec 3 %merge <citaniaMerge>
+citania:  citanie citania { NEW($$, citania, $2.citania); CPY($$.citania->l, $1.varianty); }  // %dprec 3 %merge <citaniaMerge>
     | TAG_MAJOR citania   { NEW($$, citania, $2.citania); $$.citania->tag = $1.id; }
-    | citanie             { NEW($$, citania, NULL); CPY($$.citania->l, $1.varianty); } %dprec 2
+    | citanie             { NEW($$, citania, NULL); CPY($$.citania->l, $1.varianty); }  // %dprec 2
 ;
 
 citanie: varianta OR citanie   { CPY($$.varianty, $1.varianty); CPY($$.varianty->n, $3.varianty); }
@@ -77,7 +77,7 @@ varianta: ID casti        { NEW($$, varianty, NULL); CPY($$.varianty->l, $2.cast
 
 casti: suradnice DOT casti      { CPY($$.casti, $1.casti); CPY($$.casti->n, $3.casti); $$.casti->range = 0; }
     | suradnice DASH casti      { CPY($$.casti, $1.casti); CPY($$.casti->n, $3.casti); $$.casti->range = 1; }
-    | suradnice SEMICOLON casti { CPY($$.casti, $1.casti); CPY($$.casti->n, $3.casti); $$.casti->range = 0; }
+//    | suradnice SEMICOLON casti { CPY($$.casti, $1.casti); CPY($$.casti->n, $3.casti); $$.casti->range = 0; }
     | suradnice                 { CPY($$.casti, $1.casti); $$.casti->range = 0; }
 ;
 
