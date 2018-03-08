@@ -65,7 +65,7 @@ IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]o
 \,        return COMMA;
 \;        return SEMICOLON;
 \r        return SEMICOLON;
-\n        return SEMICOLON;
+\n        // skip whitespace
 \         // skip spaces
 {ALPHA}+    yylval.id = duptag(yytext); return ID;
 .         yyerror("cannot scan!"); return ERROR;
