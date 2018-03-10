@@ -16,6 +16,7 @@ var { color: #999999; }
 .skrytykomentar { display: none; }
 .redbold { color: #ff0000; font-weight: bold; }
 .citanie { color: #ff0000; font-weight: bold; padding-bottom: 0.7ex; padding-top: 3ex; text-align: center; }
+.varianta { color: #ff0000; padding-bottom: 0.7ex; padding-top: 0.7ex; }
 .nadpis { color: #ff0000; font-size: 120%; font-weight: bold; text-align: center; padding-bottom: 1ex; }
 .bluebold { color: #0066ff; font-weight: bold; }
 .bold { font-weight: bold; }

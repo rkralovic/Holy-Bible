@@ -126,11 +126,19 @@ void Process(struct citania *l) {
 
       if (i%2 && l->n && l->n->tag == NULL) {
         Prn(&out, "<div class=\"citanie\">Žalm</div>\n\n");
-        Prn(&out, "<p><span class=\"redbold\">R: </span><span class=\"it\">%s</span></p>\n\n", a ? a : zalm ? zalm : "");
+        char* t = a;
+        if (!t) t = zalm;
+        if (t && *t) {
+          Prn(&out, "<p><span class=\"redbold\">R: </span><span class=\"it\">%s</span></p>\n\n", t);
+        }
       }
       else if (l->n && l->n->tag == NULL) Prn(&out, "<div class=\"citanie\">%d. čítanie</div>\n\n", i/2 + 1);
       else {
-        Prn(&out, "<p><span class=\"redbold\">Aleluja: </span><span class=\"it\">%s</span></p>\n\n", a ? a : aleluja ? aleluja : "");
+        char* t = a;
+        if (!t) t = aleluja;
+        if (t && *t) {
+          Prn(&out, "<p><span class=\"redbold\">Aleluja: </span><span class=\"it\">%s</span></p>\n\n", t);
+        }
         Prn(&out, "<div class=\"citanie\">Evanjelium</div>\n\n");
       }
 

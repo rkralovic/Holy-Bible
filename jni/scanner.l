@@ -19,7 +19,7 @@ void despace(char *s) {
   char *i;
   for (i=s; *i; i++) {
     *s = *i;
-    if (*s!=' ') s++;
+    if ((unsigned char)(*s) > ' ') s++;
   }
   *s = *i;
 }
@@ -67,7 +67,7 @@ IDLIST 1\ *[sS]am|2\ *[sS]am|1\ *[kK]r|2\ *[kK]r|1\ *[kK]rn|2\ *[kK]rn|1\ *[kK]o
 \r        return SEMICOLON;
 \n        // skip whitespace
 \         // skip spaces
-{ALPHA}+    yylval.id = duptag(yytext); return ID;
-.         yyerror("cannot scan!"); return ERROR;
+{ALPHA}+  yylval.id = duptag(yytext); despace(yylval.id); return ID;
+.         // silently ignore unknown characters (maybe strange whitespace?) // yyerror("cannot scan!"); return ERROR;
 
 %%
