@@ -30,7 +30,7 @@ public class History {
     while (c.moveToNext()) {
       String url = c.getString(0);
       data.addLast(c.getString(0));
-      Log.v("svpismo", table + " -> " + url);
+      //Log.v("svpismo", table + " -> " + url);
     }
     return data;
   }
@@ -44,12 +44,12 @@ public class History {
       v.put("position", i);
       v.put("url", url);
       db.insert(table, null, v);
-      Log.v("svpismo", table + " <- " + url);
+      //Log.v("svpismo", table + " <- " + url);
     }
   }
 
   public void sync() {
-    Log.v("svpismo", "Sync history");
+    //Log.v("svpismo", "Sync history");
     db.beginTransaction();
     writeTable(Db.HISTORY_TABLE, history);
     writeTable(Db.HISTORY_TABLE_FWD, forward_history);
