@@ -49,7 +49,7 @@ public class svpismo extends AppCompatActivity
     public WebView wv;
     boolean wv_initialized = false;
     boolean comments, nightmode, fullscreen, screenlock, translation_nvg;
-    String active_url = "";
+    History history;
     final String toc_url = "pismo.php?obsah=long";
 
     PowerManager.WakeLock lock;
@@ -59,7 +59,13 @@ public class svpismo extends AppCompatActivity
       return false;
     }
 
-    public void load(String url) {
+    public void loadUrl(String url) {
+      history.push(url);
+      load();
+    }
+
+    public void load() {
+      String url = history.getCurrent();
       Log.v("svpismo", "load: " + url);
       if (wv_initialized) {
         scale = (int)(wv.getScale()*100);
@@ -67,24 +73,27 @@ public class svpismo extends AppCompatActivity
       }
       String cnt;
       if (nightmode) {
-        cnt = "data:text/html;charset=UTF-8," +
-               process(db, db_len, css_inv, css_inv_len, url, comments, is_broken_kitkat());
+        cnt = process(db, db_len, css_inv, css_inv_len, url, comments, is_broken_kitkat());
       } else {
-        cnt = "data:text/html;charset=UTF-8," +
-              process(db, db_len, css, css_len, url, comments, is_broken_kitkat());
+        cnt = process(db, db_len, css, css_len, url, comments, is_broken_kitkat());
       }
-      wv.loadUrl(cnt);
+      wv.loadDataWithBaseURL("data:" + url, cnt, "text/html", "UTF-8", url);
       wv.setInitialScale(scale);
       wv_initialized = true;
-      active_url = url;
     }
 
-    public void back() {
-      wv.goBack();
+    public boolean canGoBack() {
+      return !history.isEmpty();
     }
 
-    public void forward() {
-      wv.goForward();
+    public void goBack() {
+      history.pop();
+      load();
+    }
+
+    public void goForward() {
+      history.goForward();
+      load();
     }
 
     DrawerLayout drawer;
@@ -201,6 +210,7 @@ public class svpismo extends AppCompatActivity
       wv.setInitialScale(scale);
 
       final svpismo parent = this;
+      history = new History(this);
 
       ((Button)findViewById(R.id.pgupBtn)).setOnClickListener(new View.OnClickListener() {
         public void onClick(View v) {
@@ -210,7 +220,7 @@ public class svpismo extends AppCompatActivity
 
       ((Button)findViewById(R.id.forwardBtn)).setOnClickListener(new View.OnClickListener() {
         public void onClick(View v) {
-          wv.goForward();
+          goForward();
         }
       });
       /*
@@ -261,19 +271,6 @@ public class svpismo extends AppCompatActivity
                                        new GestureDetector.SimpleOnGestureListener());
         tap_gesture_detector.setOnDoubleTapListener(this);
 
-        Intent I = getIntent();
-        if (wv.restoreState(savedInstanceState) == null) {
-          if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
-            if (I.hasExtra("nightmode")) {
-              nightmode = I.getBooleanExtra("nightmode", false);
-              syncPreferences();
-            }
-            load("pismo.cgi?" + I.getData().getQuery());
-          } else {
-            load("pismo.cgi");
-          }
-        }
-
         wv.getSettings().setJavaScriptEnabled(true);
         wv.addJavascriptInterface(new JSInterface(this), "bridge");
 
@@ -282,7 +279,7 @@ public class svpismo extends AppCompatActivity
           boolean scaleChangedRunning = false;
           { parent = myself; }
           public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            parent.load(url);
+            parent.loadUrl(url);
             return true;
           }
 
@@ -335,6 +332,21 @@ public class svpismo extends AppCompatActivity
 
         });
 
+        Intent I = getIntent();
+        if (wv.restoreState(savedInstanceState) == null) {
+          if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
+            if (I.hasExtra("nightmode")) {
+              nightmode = I.getBooleanExtra("nightmode", false);
+              syncPreferences();
+            }
+            loadUrl("pismo.cgi?" + I.getData().getQuery());
+          } else {
+            load();
+          }
+        } else {
+          Log.v("svpismo", "Restored webview state");
+        }
+
         updateFullscreen();
       } catch (IOException e) {
         wv.loadData("Some problem.", "text/html", "utf-8");
@@ -350,9 +362,10 @@ public class svpismo extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState) {
       scale = (int)(wv.getScale()*100);
       wv.setInitialScale(scale);
-      wv.saveState(outState);
-//      Log.v("svpismo", "onSaveInstanceState " + scale);
+      // wv.saveState(outState);
+      Log.v("svpismo", "onSaveInstanceState " + scale);
       syncPreferences();
+      // super.onSaveInstanceState(outState);
     }
 
     void syncPreferences() {
@@ -365,12 +378,13 @@ public class svpismo extends AppCompatActivity
       editor.putBoolean("screenlock", screenlock);
       editor.putBoolean("translation_nvg", translation_nvg);
       editor.commit();
+      history.sync();
     }
 
     protected void onStop(){
       scale = (int)(wv.getScale()*100);
       wv.setInitialScale(scale);
-//      Log.v("svpismo", "onStop " + scale);
+      // Log.v("svpismo", "onStop " + scale);
       syncPreferences();
       super.onStop();
     }
@@ -487,14 +501,14 @@ public class svpismo extends AppCompatActivity
     void toggleNightMode() {
       nightmode = !nightmode;
       syncPreferences();
-      load(active_url);
+      load();
       updateMenu();
     }
 
     void toggleComments() {
       comments = !comments;
       syncPreferences();
-      load(active_url);
+      load();
       updateMenu();
     }
 
@@ -525,7 +539,7 @@ public class svpismo extends AppCompatActivity
         setTranslationSsv();
       }
       syncPreferences();
-      load(active_url);
+      load();
       updateMenu();
     }
 
@@ -534,14 +548,14 @@ public class svpismo extends AppCompatActivity
       // Handle item selection
       switch (item.getItemId()) {
         case R.id.toc_toolbar:
-          load("pismo.cgi");
+          loadUrl("pismo.cgi");
           return true;
         case R.id.nightmode_toggle_toolbar:
           toggleNightMode();
           return true;
         case R.id.bookmarks_toolbar:
 	  Intent i = new Intent(this, Bookmarks.class);
-	  i.putExtra("location", active_url);
+	  i.putExtra("location", history.getCurrent());
 	  i.putExtra("position", wv.getScrollY() / (float)wv.getContentHeight());
 	  startActivityForResult(i, Bookmarks.BOOKMARKS);
           return true;
@@ -566,8 +580,8 @@ public class svpismo extends AppCompatActivity
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-      if ((keyCode == KeyEvent.KEYCODE_BACK) && wv.canGoBack()) {
-        wv.goBack();
+      if ((keyCode == KeyEvent.KEYCODE_BACK) && canGoBack()) {
+        goBack();
         return true;
       }
       if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
@@ -606,7 +620,7 @@ public class svpismo extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
       switch (item.getItemId()) {
         case R.id.toc:
-          load(toc_url);
+          loadUrl(toc_url);
           break;
         case R.id.comments_toggle:
           toggleComments();
@@ -625,7 +639,7 @@ public class svpismo extends AppCompatActivity
           break;
         case R.id.bookmarks:
 	  Intent i = new Intent(this, Bookmarks.class);
-	  i.putExtra("location", active_url);
+	  i.putExtra("location", history.getCurrent());
 	  i.putExtra("position", wv.getScrollY() / (float)wv.getContentHeight());
 	  startActivityForResult(i, Bookmarks.BOOKMARKS);
           break;
@@ -640,7 +654,7 @@ public class svpismo extends AppCompatActivity
         case Bookmarks.BOOKMARKS:
 	  if (resultCode == RESULT_OK) {
             scroll_to = data.getFloatExtra("position", 0);
-            load(data.getStringExtra("location"));
+            loadUrl(data.getStringExtra("location"));
 	  }
 	  break;
         default:

@@ -4,7 +4,7 @@
       android:versionCode="23"
       android:versionName="1.7.2"
       android:installLocation="auto">
-    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="26"/>
+    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="25"/>
     <supports-screens android:xlargeScreens="true"/>
     <application android:label="@string/app_name"
                  android:theme="@style/LocalTheme"

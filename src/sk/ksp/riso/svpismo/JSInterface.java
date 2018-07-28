@@ -17,7 +17,7 @@ public class JSInterface {
 //      Log.v("svpismo", "bridge called: "+url);
       mContext.wv.post(new Runnable() {
         public void run() {
-          mContext.load(url);
+          mContext.loadUrl(url);
         }
       });
     }
@@ -35,7 +35,7 @@ public class JSInterface {
     public void back() {
       mContext.wv.post(new Runnable() {
         public void run() {
-          mContext.back();
+          mContext.goBack();
         }
       });
     }
@@ -44,7 +44,7 @@ public class JSInterface {
     public void forward() {
       mContext.wv.post(new Runnable() {
         public void run() {
-          mContext.forward();
+          mContext.goForward();
         }
       });
     }
