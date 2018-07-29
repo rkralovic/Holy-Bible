@@ -11,6 +11,8 @@
                  android:icon="@drawable/icon">
         <meta-data android:name="android.max_aspect" android:value="47.7" />
         <activity android:name="svpismo"
+                  android:configChanges="orientation|screenSize"
+                  android:launchMode="singleTask"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

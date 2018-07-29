@@ -10,7 +10,7 @@ class Db extends SQLiteOpenHelper {
   static final String HISTORY_TABLE_FWD = "history_fwd";
 
   Db(Context ctx) {
-    super(ctx, "svpismo", null, 2);
+    super(ctx, "svpismo", null, 3);
   }
 
   void createBookmarks(SQLiteDatabase db) {
@@ -19,8 +19,8 @@ class Db extends SQLiteOpenHelper {
   }
 
   void createHistory(SQLiteDatabase db) {
-    db.execSQL("CREATE TABLE " + HISTORY_TABLE + " ( position int, url text )");
-    db.execSQL("CREATE TABLE " + HISTORY_TABLE_FWD + " ( position int, url text )");
+    db.execSQL("CREATE TABLE " + HISTORY_TABLE + " ( position int, url text, scroll float)");
+    db.execSQL("CREATE TABLE " + HISTORY_TABLE_FWD + " ( position int, url text, scroll float)");
   }
 
   public void onCreate(SQLiteDatabase db) {
@@ -29,7 +29,7 @@ class Db extends SQLiteOpenHelper {
   }
 
   public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
-    if (oldV < 2) {
+    if (oldV < 3) {
       db.execSQL("drop table if exists " + HISTORY_TABLE);
       db.execSQL("drop table if exists " + HISTORY_TABLE_FWD);
       if (newV >= 2) {

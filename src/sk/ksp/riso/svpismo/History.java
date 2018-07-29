@@ -11,9 +11,26 @@ public class History {
   Db dbHelper;
   SQLiteDatabase db;
 
+  static class Entry {
+    public Entry(String url) {
+      this.url = url;
+      this.scroll = -1;
+    }
+
+    public Entry(String url, float scroll) {
+      this.url = url;
+      this.scroll = scroll;
+    }
+
+    public String url;
+    public float scroll;
+  }
+
+  Entry default_entry;
+
   static final int MAX_HISTORY = 1000;
-  ArrayDeque<String> history;
-  ArrayDeque<String> forward_history;
+  ArrayDeque<Entry> history;
+  ArrayDeque<Entry> forward_history;
 
   History(Context ctx) {
     dbHelper = new Db(ctx);
@@ -21,30 +38,29 @@ public class History {
 
     history = readTable(Db.HISTORY_TABLE);
     forward_history = readTable(Db.HISTORY_TABLE_FWD);
+    default_entry = new Entry("pismo.cgi", -1);
   }
 
-  ArrayDeque<String> readTable(String table) {
-    ArrayDeque<String> data = new ArrayDeque<String>();
-    Cursor c = db.rawQuery("select url from " + table +
+  ArrayDeque<Entry> readTable(String table) {
+    ArrayDeque<Entry> data = new ArrayDeque<Entry>();
+    Cursor c = db.rawQuery("select url, scroll from " + table +
                            " order by position asc", null);
     while (c.moveToNext()) {
-      String url = c.getString(0);
-      data.addLast(c.getString(0));
-      //Log.v("svpismo", table + " -> " + url);
+      data.addLast(new Entry(c.getString(0), c.getFloat(1)));
     }
     return data;
   }
 
-  void writeTable(String table, ArrayDeque<String> data) {
+  void writeTable(String table, ArrayDeque<Entry> data) {
     db.execSQL("delete from " + table);
     int i = 0;
-    for (String url: data) {
+    for (Entry e : data) {
       ++i;
       ContentValues v = new ContentValues();
       v.put("position", i);
-      v.put("url", url);
+      v.put("url", e.url);
+      v.put("scroll", e.scroll);
       db.insert(table, null, v);
-      //Log.v("svpismo", table + " <- " + url);
     }
   }
 
@@ -70,12 +86,17 @@ public class History {
     history.addLast(forward_history.pollLast());
   }
 
-  public String getCurrent() {
+  public Entry getCurrent() {
     try {
       return history.getLast();
     } catch (java.util.NoSuchElementException e) {
-      return "pismo.cgi";
+      return default_entry;
     }
+  }
+
+  public void setCurrentScroll(float scroll) {
+    if (isEmpty()) return;
+    getCurrent().scroll = scroll;
   }
 
   public void pop() {
@@ -83,10 +104,10 @@ public class History {
     forward_history.addLast(history.pollLast());
   }
 
-  public void push(String url) {
-    history.addLast(url);
+  public void push(Entry entry) {
+    history.addLast(entry);
     if (!forward_history.isEmpty()) {
-      forward_history = new ArrayDeque<String>();
+      forward_history = new ArrayDeque<Entry>();
     }
     if (history.size() > MAX_HISTORY) {
       history.pollFirst();
