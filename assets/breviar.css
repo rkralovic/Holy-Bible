@@ -31,22 +31,22 @@ var { color: #999999; }
 
 /* 2003-07-09; 2004-03-23; 2008-02-27 */
 /* apply to all elements */ { font-family: Cambria, Verdana, Tahoma, Georgia, Sans Serif; font-size: 100%; }
-body, html { 
-	background-color: #FFFFCC; 
-	color: #000000; 
-	font-family: Cambria, Verdana, Tahoma, Georgia, Sans Serif; 
+body, html {
+	background-color: #FFFFCC;
+	color: #000000;
+	font-family: Cambria, Verdana, Tahoma, Georgia, Sans Serif;
 }
 p { font-family: Cambria, Verdana, Tahoma, Georgia, Sans Serif; color: #000000; font-style: normal; }
 
 
-.duoraz { 
+.duoraz {
 	font-weight: bold; }
 
-p.patka { 
-	font-size: 80%; 
-	text-align: center; 
-	text-indent: 0em;  
-	margin-top: -1mm; 
+p.patka {
+	font-size: 80%;
+	text-align: center;
+	text-indent: 0em;
+	margin-top: -1mm;
 	letter-spacing: 0mm }
 
 a { font-family: Cambria, Verdana, Tahoma, Georgia, Sans Serif; color: #000000; text-decoration: underline; }
@@ -63,20 +63,20 @@ th { vertical-align: baseline }
 
 hr {	height: 0.2mm;
 	size: 1px;
-	width: 33%; 
+	width: 33%;
 	color: gray; }
 
 select { background: white; font-family: Cambria, Verdana, Tahoma, Georgia, Sans Serif; font-size : 95%; color: #000000}
 
 input { border: 1px; font-family: Cambria, Verdana, Tahoma, Georgia, Sans Serif; font-size : 95%; color: #000000; }
 
-input.button, input.reset { 
+input.button, input.reset {
 	margin-left: 0px!important;
-	background: white; 
-	font-family: Cambria, Verdana, Tahoma, Georgia, Sans Serif; 
-	font-size : 90%; 
-	text-decoration:none; 
-	color: #000000; 
+	background: white;
+	font-family: Cambria, Verdana, Tahoma, Georgia, Sans Serif;
+	font-size : 90%;
+	text-decoration:none;
+	color: #000000;
 	border: solid 1px #226500; }
 
 input.text { border-style: solid; background: white; }

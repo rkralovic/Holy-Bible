@@ -19,7 +19,7 @@
     android:orientation="horizontal">
 
     <TextView android:id="@+id/listLabel"
-      android:padding="3sp"
+      android:padding="6sp"
       android:layout_width="wrap_content" android:layout_height="45sp"/>
 
 </LinearLayout>

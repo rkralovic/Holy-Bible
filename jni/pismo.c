@@ -614,7 +614,9 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
       "<button id=\"gombik_hladaj\" onClick=\"submitsearch()\">Hľadaj</button>\n");
   Prn(&out, "</div><div id=\"scaler\">\n"
       "<a href=\"pismo.cgi?obsah=long\">Obsah</a></div>\n");
-    
+#ifndef NOANDROID
+  Prn(&out, "<script type=\"text/javascript\">bridge.finished()</script>\n");
+#endif
   Prn(&out, "</body></html>\n");
 
   FreeBuf(&kontext);

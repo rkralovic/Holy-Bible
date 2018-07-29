@@ -67,7 +67,7 @@ public class svpismo extends AppCompatActivity
     public void load() {
       History.Entry entry = history.getCurrent();
       String url = entry.url;
-      Log.v("svpismo", "load: " + url);
+      Log.v("svpismo", "load: " + url + " at " + new Double(entry.scroll));
       if (wv_initialized) {
         scale = (int)(wv.getScale()*100);
 //        Log.v("svpismo", "load: getScale " + scale);
@@ -85,11 +85,17 @@ public class svpismo extends AppCompatActivity
     }
 
     public boolean canGoBack() {
-      return !history.isEmpty();
+      return !history.isEmpty() && !history.isAtMark();
     }
 
-    void setCurrentScroll() {
-      history.setCurrentScroll(wv.getScrollY() / (float)wv.getContentHeight());
+    public void setCurrentScroll() {
+      float v = scroll_to;
+      // Log.v("svpismo", "setCurrentScroll, scroll_to = " + new Float(v).toString());
+      if (v < 0) {
+        v = wv.getScrollY() / (float)wv.getContentHeight();
+        // Log.v("svpismo", "setCurrentScroll: actual value " + new Float(v).toString());
+      }
+      history.setCurrentScroll(v);
     }
 
     public void goBack() {
@@ -295,6 +301,7 @@ public class svpismo extends AppCompatActivity
           @Override
           public void onScaleChanged(WebView view, float oldSc, float newSc) {
             parent.scale = (int)(newSc*100);
+            if (oldSc == newSc) return;
             if (Build.VERSION.SDK_INT < 19) {  // pre-KitKat
               view.setInitialScale(parent.scale);
             } else {
@@ -318,7 +325,7 @@ public class svpismo extends AppCompatActivity
                   }
                   scaleChangedRunning = false;
                 }
-              }, 100);
+              }, 10);
             }
 //              Log.v("svpismo", "onScaleChanged " + parent.scale);
           }
@@ -329,33 +336,27 @@ public class svpismo extends AppCompatActivity
             // Ugly hack. But we have no reliable notification when is webview scrollable.
             final WebView wv = view;
             view.postDelayed(new Runnable() {
+              int last_height = 0;
               public void run() {
                 if (parent.scroll_to >= 0) {
-                  int Y = (int)(parent.scroll_to*wv.getContentHeight());
-                  wv.scrollTo(0, Y);
+                  int current_height = wv.getContentHeight();
+                  if (current_height > 0 && current_height == last_height) {
+                    int Y = (int)(parent.scroll_to*wv.getContentHeight());
+                    // Log.v("svpismo", "rendered " + current_height + " scrolling to " + Y);
+                    wv.scrollTo(0, Y);
+                    parent.scroll_to = -1;
+                  } else {
+                    // Log.v("svpismo", "waiting on rendering, currently at " + current_height);
+                    last_height = current_height;
+                    wv.postDelayed(this, 20);
+                  }
                 }
-                parent.scroll_to = -1;
               }
-            }, 400);
+            }, 40);
           }
-
         });
 
-        Intent I = getIntent();
-        if (wv.restoreState(savedInstanceState) == null) {
-          if (I.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
-            if (I.hasExtra("nightmode")) {
-              nightmode = I.getBooleanExtra("nightmode", false);
-              syncPreferences();
-            }
-            loadUrl("pismo.cgi?" + I.getData().getQuery(), -1);
-          } else {
-            load();
-          }
-        } else {
-          Log.v("svpismo", "Restored webview state");
-        }
-
+        onNewIntent(getIntent());
         updateFullscreen();
       } catch (IOException e) {
         wv.loadData("Some problem.", "text/html", "utf-8");
@@ -368,13 +369,27 @@ public class svpismo extends AppCompatActivity
       updateMenu();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+      if (intent != null && intent.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
+        if (intent.hasExtra("nightmode")) {
+          nightmode = intent.getBooleanExtra("nightmode", false);
+          syncPreferences();
+        }
+        setCurrentScroll();
+        loadUrl("pismo.cgi?" + intent.getData().getQuery(), -1);
+        history.setMark();
+      } else {
+        history.clearMark();
+        load();
+      }
+    }
+
     protected void onSaveInstanceState(Bundle outState) {
       scale = (int)(wv.getScale()*100);
       wv.setInitialScale(scale);
-      // wv.saveState(outState);
       Log.v("svpismo", "onSaveInstanceState " + scale);
       syncPreferences();
-      // super.onSaveInstanceState(outState);
     }
 
     void syncPreferences() {
@@ -590,9 +605,13 @@ public class svpismo extends AppCompatActivity
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-      if ((keyCode == KeyEvent.KEYCODE_BACK) && canGoBack()) {
-        goBack();
-        return true;
+      if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+        if (canGoBack()) {
+          goBack();
+          return true;
+        }
+        history.pop();
+        scroll_to = history.getCurrent().scroll;
       }
       if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
         wv.pageUp(false);

@@ -31,6 +31,7 @@ public class History {
   static final int MAX_HISTORY = 1000;
   ArrayDeque<Entry> history;
   ArrayDeque<Entry> forward_history;
+  int marker;
 
   History(Context ctx) {
     dbHelper = new Db(ctx);
@@ -39,6 +40,7 @@ public class History {
     history = readTable(Db.HISTORY_TABLE);
     forward_history = readTable(Db.HISTORY_TABLE_FWD);
     default_entry = new Entry("pismo.cgi", -1);
+    marker = -1;
   }
 
   ArrayDeque<Entry> readTable(String table) {
@@ -73,6 +75,18 @@ public class History {
     db.endTransaction();
   }
 
+  public void setMark() {
+    marker = 0;
+  }
+
+  public void clearMark() {
+    marker = -1;
+  }
+
+  public boolean isAtMark() {
+    return marker == 0;
+  }
+
   public boolean isEmpty() {
     return history.isEmpty();
   }
@@ -84,6 +98,16 @@ public class History {
   public void goForward() {
     if (isLast()) return;
     history.addLast(forward_history.pollLast());
+    increaseMarker();
+  }
+
+  void increaseMarker() {
+    if (marker >= 0) {
+      marker++;
+    }
+    if (history.size() > MAX_HISTORY) {
+      history.pollFirst();
+    }
   }
 
   public Entry getCurrent() {
@@ -102,6 +126,12 @@ public class History {
   public void pop() {
     if (history.isEmpty()) return;
     forward_history.addLast(history.pollLast());
+    if (marker >= 0) {
+      marker--;
+    }
+    if (history.isEmpty()) {
+      marker = -1;
+    }
   }
 
   public void push(Entry entry) {
@@ -109,8 +139,6 @@ public class History {
     if (!forward_history.isEmpty()) {
       forward_history = new ArrayDeque<Entry>();
     }
-    if (history.size() > MAX_HISTORY) {
-      history.pollFirst();
-    }
+    increaseMarker();
   }
 }
