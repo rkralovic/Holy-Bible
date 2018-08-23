@@ -74,11 +74,13 @@ public class svpismo extends AppCompatActivity
       }
       String cnt;
       if (nightmode) {
-        cnt = process(db, db_len, css_inv, css_inv_len, url, comments, is_broken_kitkat());
+        cnt = "data:text/html;charset=UTF-8," +
+               process(db, db_len, css_inv, css_inv_len, url, comments, is_broken_kitkat());
       } else {
-        cnt = process(db, db_len, css, css_len, url, comments, is_broken_kitkat());
+        cnt = "data:text/html;charset=UTF-8," +
+              process(db, db_len, css, css_len, url, comments, is_broken_kitkat());
       }
-      wv.loadDataWithBaseURL("data:" + url, cnt, "text/html", "UTF-8", url);
+      wv.loadUrl(cnt);
       wv.setInitialScale(scale);
       wv_initialized = true;
       scroll_to = entry.scroll;
