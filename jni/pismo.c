@@ -26,6 +26,40 @@ struct kap {
   int h;
 } first, last;
 
+char *StringEncode(char *in) {
+  static unsigned char tab[17]="0123456789ABCDEF";
+  int i;
+  unsigned char *s, *out;
+
+  for (s=(unsigned char *)in,i=0; *s; s++) {
+    if (
+        ( (*s>='a')&&(*s<='z') ) ||
+        ( (*s>='A')&&(*s<='Z') ) ||
+        ( (*s>='0')&&(*s<='9') )
+       ) i+=1;
+    else i+=3;
+  }
+  out=(unsigned char *)malloc(i+1);
+
+  for (s=(unsigned char *)in,i=0; *s; s++) {
+    if (
+        ( (*s>='a')&&(*s<='z') ) ||
+        ( (*s>='A')&&(*s<='Z') ) ||
+        ( (*s>='0')&&(*s<='9') )
+       ) {
+      out[i]=*s;
+      i+=1;
+    } else {
+      out[i]='%';
+      out[i+1]=tab[*s / 16];
+      out[i+2]=tab[*s % 16];
+      i+=3;
+    }
+  }
+  out[i]=0;
+  return (char *)out;
+}
+
 void Print(struct casti *_c) {
   char *k, *s;
   int vb, ve, hb, he, flags;
@@ -166,6 +200,17 @@ void Process(struct citania *l) {
 //        Prn(&out, "varianta: %s\n", v->tag);
         if (!first) Prn(&out, "<div class=\"varianta\">Alebo:</div>\n\n");
         Print(v->l);
+        if (l->l && kalendar) {
+          // Ak mame liturgicke citania, kontext dame po kazdom citani.
+          if (strlen(kontext.buf) > 1) {
+            char *tmp = StringEncode(kontext.buf+1);
+            Prn(&out, // "<p>\n"
+                "<a href=\"pismo.cgi?c=%s\">Kontext</a>", tmp);
+            free(tmp);
+            Rst(&kontext);
+            Prn(&out, "&nbsp; &nbsp;");
+          }
+        }
         first = 0;
       } else if (v->tag) {
         Prn(&out, "<div class=\"tagMinor\">%s</div>\n\n", v->tag);
@@ -209,40 +254,6 @@ char *StringDecode(char *in) {
   }
   out[i]=0;
   return out;
-}
-
-char *StringEncode(char *in) {
-  static unsigned char tab[17]="0123456789ABCDEF";
-  int i;
-  unsigned char *s, *out;
-
-  for (s=(unsigned char *)in,i=0; *s; s++) {
-    if (
-        ( (*s>='a')&&(*s<='z') ) ||
-        ( (*s>='A')&&(*s<='Z') ) ||
-        ( (*s>='0')&&(*s<='9') )
-       ) i+=1;
-    else i+=3;
-  }
-  out=(unsigned char *)malloc(i+1);
-
-  for (s=(unsigned char *)in,i=0; *s; s++) {
-    if (
-        ( (*s>='a')&&(*s<='z') ) ||
-        ( (*s>='A')&&(*s<='Z') ) ||
-        ( (*s>='0')&&(*s<='9') )
-       ) {
-      out[i]=*s;
-      i+=1;
-    } else {
-      out[i]='%';
-      out[i+1]=tab[*s / 16];
-      out[i+2]=tab[*s % 16];
-      i+=3;
-    }
-  }
-  out[i]=0;
-  return (char *)out;
 }
 
 int IsSingleChapter(const char* b) {
