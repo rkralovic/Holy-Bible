@@ -146,6 +146,14 @@ static int cmp(const char *a, const char *b) {
 
 int find_book(const char *s) {
   int i;
+
+  // There should be no empty book.
+  // We're comparing it because database itself contains "books" (separators)
+  // with empty names - using them can lead to a crash in some circumstances.
+  if (!s[0]) {
+    return -1;
+  }
+
   for (i=0; i<hdr->n_knihy; i++) {
     if (!cmp( s, STR(knh[i].meno) )) return i;
     if (!cmp( s, STR(knh[i].alias) )) return i;
@@ -251,6 +259,10 @@ void add_search(int hb, int vb, int he, int ve) {
       }
       while (r<ni && I[r].b <= e) {
         if (I[r].e >= b) {
+          if (n >= MAX_RES) {
+            // Disallow writing out of bounds.
+            return;
+          }
           res[n].flags = 0;
           if (I[r].comment) res[n].flags |= RESULT_FLAG_COMMENT;
           res[n].id = get_id(I[r].comment, I[r].id, I[r].e);
@@ -266,6 +278,11 @@ void add_search(int hb, int vb, int he, int ve) {
   I = (struct item *)(base+hdr->item[TABLES-1]);
   for (i=0; i<hdr->n_item[TABLES-1]; i++) {
     if (I[i].b <=e && I[i].e >=b) {
+      if (n >= MAX_RES) {
+        // Disallow writing out of bounds.
+        return;
+      }
+
       res[n].flags = 0;
       if (I[i].comment) res[n].flags |= RESULT_FLAG_COMMENT;
       res[n].id=get_id(I[i].comment, I[i].id, I[i].e);
