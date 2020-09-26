@@ -72,7 +72,7 @@ citanie: varianta OR citanie   { CPY($$.varianty, $1.varianty); CPY($$.varianty-
 oddelovac: SEMICOLON | END
 ;
 
-varianta: ID casti        { NEW($$, varianty, NULL); CPY($$.varianty->l, $2.casti); strncpy($$.varianty->l->k, $1.id, sizeof($$.varianty->l->k)); }
+varianta: ID casti        { NEW($$, varianty, NULL); CPY($$.varianty->l, $2.casti); strncpy($$.varianty->l->k, $1.id, sizeof($$.varianty->l->k)); free($1.id); }
 ;
 
 casti: suradnice DOT casti      { CPY($$.casti, $1.casti); CPY($$.casti->n, $3.casti); $$.casti->range = 0; }
@@ -89,7 +89,7 @@ hlava:  NUM          { $$.num = $1.num; }
 ;
 
 vers: NUM castversa  { $$.num = $1.num; }
-    | castversa  { }
+    | castversa  { $$.num = 0; }
 ;
 
 castversa: | ID         { free($1.id); }
