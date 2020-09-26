@@ -557,7 +557,19 @@ void CommonMain(const char* qstr, const char* css, int css_len) {
           if (!strncmp(t+i+1, "var>", 4)) var = 1;
           if (!strncmp(t+i+1, "/var>", 5)) var = 0;
         }
-        if (!in && !var) Prn(&out, "%c", t[i]);
+        if (!in && !var) {
+            Prn(&out, "%c", t[i]);
+        } else {
+            // We're not using output here - however, the result can be
+            // 1. Some text
+            // 2. more text
+            //
+            // By outputting everything, we'd get "Some textmore text".
+            // We're adding spaces here to add separation between verses.
+            // It's HTML, so more spaces are like 1 space; therefore we
+            // don't have to complicate it by reducing number of spaces.
+            Prn(&out, " ");
+        }
         if (t[i]=='>') in = 0;
       }
       if (cnt==1000) {
