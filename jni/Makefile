@@ -4,16 +4,16 @@ LDFLAGS+=-O0 -ggdb -DNOANDROID
 all: pismo pismo.cgi db_bin_gen pismo.mobi pismo.epub
 
 pismo.cgi: pismo.o parser.tab.o scanner.o common.o db_mysql.o
-	$(CC) $(LDFLAGS) $^ -o $@ -lmysqlclient
+	$(CC) $(LDFLAGS) $^ -o $@ -lmariadbclient
 
 pismo: pismo.o parser.tab.o scanner.o common.o db_bin.o
 	$(CC) $(LDFLAGS) $^ -o $@
 
 db_bin_gen: db_bin_gen.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lmysqlclient
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lmariadbclient
 
 db_bin_to_ebook: db_bin_to_ebook.o db_bin.o parser.tab.o scanner.o common.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lmysqlclient
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ -lmariadbclient
 
 pismo.mobi: db_bin_to_ebook ebook.css
 	./db_bin_to_ebook >/tmp/pismo.html

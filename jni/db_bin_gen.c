@@ -1,4 +1,4 @@
-#include <mysql.h>
+#include <mariadb/mysql.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -129,7 +129,7 @@ int main() {
         row2 = mysql_fetch_row(result2);
         sscanf(row2[0], "%d", &l);
         if (l-1 != k) {
-          fprintf(stderr, "nesuvisle id versa k=%d h=%d v=%d!=%d, ignorujem\n", i+1, j+1, l, k+1);
+          fprintf(stderr, "nesuvisle id versa k=%d(%s,%s) h=%d v=%d!=%d, ignorujem\n", i+1, row[1], row[2], j+1, l, k+1);
           k--;
           HLV[j].n_versov--;
           continue;
