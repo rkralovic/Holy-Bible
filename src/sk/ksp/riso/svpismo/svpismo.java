@@ -373,7 +373,9 @@ public class svpismo extends AppCompatActivity
 
     @Override
     protected void onNewIntent(Intent intent) {
-      if (intent != null && intent.getAction().equals("sk.ksp.riso.svpismo.action.SHOW")) {
+      if (intent != null && (
+            intent.getAction().equals("sk.ksp.riso.svpismo.action.SHOW") ||
+            intent.getAction().equals("android.intent.action.VIEW"))) {
         if (intent.hasExtra("nightmode")) {
           nightmode = intent.getBooleanExtra("nightmode", false);
           syncPreferences();

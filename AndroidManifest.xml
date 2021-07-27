@@ -18,9 +18,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="sk.ksp.riso.svpismo.action.SHOW" />
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="http" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="svpismo.skmisia.ch" />
+                <data android:scheme="http" android:host="svpismo.skmisia.ch" />
             </intent-filter>
             <intent-filter>
                 <action android:name="sk.ksp.riso.svpismo.action.SHOW" />
