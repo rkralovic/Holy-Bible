@@ -23,6 +23,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="svpismo.skmisia.ch" />
                 <data android:scheme="http" android:host="svpismo.skmisia.ch" />
+                <data android:scheme="https" android:host="dkc.kbs.sk" />
+                <data android:scheme="http" android:host="dkc.kbs.sk" />
             </intent-filter>
             <intent-filter>
                 <action android:name="sk.ksp.riso.svpismo.action.SHOW" />
