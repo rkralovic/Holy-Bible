@@ -81,10 +81,27 @@ static char *Normalize(const char *s) {
     for (k=0; k<n; k++)
       T[((int)((uint8_t)C[k].in[0]))<<8 | (int)(((uint8_t)C[k].in[1]))] = C[k].out;
   }
-  for (i=s, j=out; *i; i++, j++) {
-    *j = T[((int)((uint8_t)i[0]))<<8 | (int)((uint8_t)i[1])];
-    if (!*j) *j = tolower(*i);
-    else i++;
+
+  int skipping = 0;
+
+  for (i=s, j=out; *i; i++) {
+    if (*i == '<') {
+      skipping = 1;
+    }
+
+    if (*i == '>') {
+      skipping = 0;
+    }
+
+    if (!skipping) {
+      *j = T[((int)((uint8_t)i[0]))<<8 | (int)((uint8_t)i[1])];
+      if (!*j) {
+        *j = tolower(*i);
+      } else {
+        i++;
+      }
+      j++;
+    }
   }
   *j = 0;
   return out;
