@@ -87,13 +87,9 @@ static char *Normalize(const char *s) {
   for (i=s, j=out; *i; i++) {
     if (*i == '<') {
       skipping = 1;
-    }
-
-    if (*i == '>') {
+    } else if (*i == '>') {
       skipping = 0;
-    }
-
-    if (!skipping) {
+    } else if (!skipping) {
       *j = T[((int)((uint8_t)i[0]))<<8 | (int)((uint8_t)i[1])];
       if (!*j) {
         *j = tolower(*i);
