@@ -4,7 +4,7 @@ buildscript {
     google()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:4.2.0'
+    classpath 'com.android.tools.build:gradle:8.4.0'
   }
 }
 
@@ -28,11 +28,12 @@ def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
-  compileSdkVersion 30
+  namespace 'sk.ksp.riso.svpismo'
+  compileSdkVersion 34
 
   defaultConfig {
-    targetSdkVersion 30
-    minSdkVersion 14
+    targetSdkVersion 34
+    minSdkVersion 21
     ndk {
       // Tells Gradle to build outputs for the following ABIs and package
       // them into your APK.

@@ -136,7 +136,7 @@ void db_close() {
 int db_init() {
   base = db;
 
-  __android_log_print(ANDROID_LOG_INFO, "svpismo", "db_init: db=%x, db_len=%d\n", (unsigned int)db, db_len);
+//  __android_log_print(ANDROID_LOG_INFO, "svpismo", "db_init: db=%x, db_len=%d\n", (unsigned int)db, db_len);
   hdr = (struct header *)base;
   if (hdr->signature!=SIGNATURE) {
     __android_log_print(ANDROID_LOG_INFO, "svpismo", "db_init: wrong signature %x != %x\n", hdr->signature, SIGNATURE);
