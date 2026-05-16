@@ -2,6 +2,9 @@
 /bin
 /libs
 /obj
+/jni/parser.output
+/jni/parser.tab.*
+/jni/scanner.c
 keystore.properties
 build
 .gradle

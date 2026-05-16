@@ -4,7 +4,7 @@ buildscript {
     google()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:8.4.0'
+    classpath 'com.android.tools.build:gradle:8.11.0'
   }
 }
 
@@ -23,17 +23,21 @@ def keystorePropertiesFile = rootProject.file("keystore.properties")
 
 // Initialize a new Properties() object called keystoreProperties.
 def keystoreProperties = new Properties()
+def hasKeystoreProperties = keystorePropertiesFile.exists()
 
 // Load your keystore.properties file into the keystoreProperties object.
-keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+if (hasKeystoreProperties) {
+  keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 
 android {
   namespace 'sk.ksp.riso.svpismo'
-  compileSdkVersion 34
+  compileSdk 36
+  ndkVersion '28.2.13676358'
 
   defaultConfig {
-    targetSdkVersion 34
-    minSdkVersion 21
+    targetSdk 36
+    minSdk 21
     ndk {
       // Tells Gradle to build outputs for the following ABIs and package
       // them into your APK.
@@ -65,23 +69,27 @@ android {
   }
 
   signingConfigs {
-    release {
-      keyAlias keystoreProperties['keyAlias']
-      keyPassword keystoreProperties['keyPassword']
-      storeFile file(keystoreProperties['storeFile'])
-      storePassword keystoreProperties['storePassword']
+    if (hasKeystoreProperties) {
+      release {
+        keyAlias keystoreProperties['keyAlias']
+        keyPassword keystoreProperties['keyPassword']
+        storeFile file(keystoreProperties['storeFile'])
+        storePassword keystoreProperties['storePassword']
+      }
     }
   }
   buildTypes {
     release {
-      signingConfig signingConfigs.release
+      if (hasKeystoreProperties) {
+        signingConfig signingConfigs.release
+      }
     }
   }
 }
 
 dependencies {
-  api "com.android.support:support-v4:27.0.0"
-  api "com.android.support:support-core-utils:27.0.0"
-  api 'com.android.support:design:27.0.0'
-  api 'com.android.support:appcompat-v7:27.0.0'
+  implementation 'androidx.core:core:1.17.0'
+  implementation 'androidx.drawerlayout:drawerlayout:1.2.0'
+  implementation 'androidx.appcompat:appcompat:1.7.1'
+  implementation 'com.google.android.material:material:1.13.0'
 }
