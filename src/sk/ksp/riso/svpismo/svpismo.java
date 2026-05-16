@@ -25,8 +25,12 @@ import android.widget.CompoundButton;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.MenuItemCompat;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
@@ -139,6 +143,7 @@ public class svpismo extends AppCompatActivity
 
       navigationView = (NavigationView) findViewById(R.id.navigation);
       navigationView.setNavigationItemSelectedListener(this);
+      applySystemBarInsets();
 
       Menu menu = navigationView.getMenu();
       try {
@@ -371,6 +376,30 @@ public class svpismo extends AppCompatActivity
         setTranslationSsv();
       }
       updateMenu();
+    }
+
+    void applySystemBarInsets() {
+      addSystemBarPadding(findViewById(R.id.main_content));
+      addSystemBarPadding(findViewById(R.id.navigation));
+    }
+
+    void addSystemBarPadding(final View target) {
+      final int initialLeft = target.getPaddingLeft();
+      final int initialTop = target.getPaddingTop();
+      final int initialRight = target.getPaddingRight();
+      final int initialBottom = target.getPaddingBottom();
+
+      ViewCompat.setOnApplyWindowInsetsListener(target, new OnApplyWindowInsetsListener() {
+        @Override
+        public WindowInsetsCompat onApplyWindowInsets(View view, WindowInsetsCompat insets) {
+          Insets bars = insets.getInsets(
+              WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+          view.setPadding(initialLeft + bars.left, initialTop + bars.top,
+              initialRight + bars.right, initialBottom + bars.bottom);
+          return insets;
+        }
+      });
+      ViewCompat.requestApplyInsets(target);
     }
 
     @Override
